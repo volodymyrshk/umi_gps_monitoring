@@ -19,7 +19,7 @@ function MapUpdater({ selectedVehicle }: { selectedVehicle: Vehicle | null }) {
 
   useEffect(() => {
     if (selectedVehicle) {
-      map.setView([selectedVehicle.location.lat, selectedVehicle.location.lng], 15);
+      map.flyTo([selectedVehicle.location.lat, selectedVehicle.location.lng], 15);
     }
   }, [selectedVehicle, map]);
 

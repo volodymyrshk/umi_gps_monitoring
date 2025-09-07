@@ -1,32 +1,12 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { Vehicle } from '@/types/vehicle';
 import MapControls from './MapControls';
+import VehicleMarker from './VehicleMarker';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-
-// Create custom simple markers without shadows
-const createCustomIcon = (status: 'online' | 'offline' | 'warning', isSelected: boolean) => {
-  const color = status === 'online' ? '#22c55e' : status === 'warning' ? '#ef4444' : '#6b7280';
-  const size = isSelected ? 16 : 12;
-  
-  return L.divIcon({
-    className: 'custom-marker',
-    html: `<div style="
-      width: ${size}px;
-      height: ${size}px;
-      background-color: ${color};
-      border: 2px solid white;
-      border-radius: 50%;
-      ${isSelected ? 'box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);' : ''}
-    "></div>`,
-    iconSize: [size, size],
-    iconAnchor: [size/2, size/2],
-    popupAnchor: [0, -size/2]
-  });
-};
 
 interface MapProps {
   vehicles: Vehicle[];
@@ -86,33 +66,12 @@ export default function Map({ vehicles, selectedVehicle, onVehicleSelect }: MapP
         <MapUpdater selectedVehicle={selectedVehicle} />
         
         {vehicles.map((vehicle) => (
-          <Marker
+          <VehicleMarker
             key={vehicle.id}
-            position={[vehicle.location.lat, vehicle.location.lng]}
-            icon={createCustomIcon(vehicle.status, selectedVehicle?.id === vehicle.id)}
-            eventHandlers={{
-              click: () => onVehicleSelect(vehicle),
-            }}
-          >
-            <Popup>
-              <div className="min-w-48">
-                <h3 className="font-bold text-sm mb-2">{vehicle.name}</h3>
-                <p className="text-xs text-gray-600 mb-2">{vehicle.location.address}</p>
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-sm">
-                    Battery: {vehicle.battery}%
-                  </span>
-                  <span className={`text-xs px-2 py-1 rounded ${
-                    vehicle.status === 'online' ? 'bg-green-100 text-green-800' :
-                    vehicle.status === 'warning' ? 'bg-red-100 text-red-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {vehicle.status}
-                  </span>
-                </div>
-              </div>
-            </Popup>
-          </Marker>
+            vehicle={vehicle}
+            isSelected={selectedVehicle?.id === vehicle.id}
+            onVehicleSelect={onVehicleSelect}
+          />
         ))}
       </MapContainer>
       
@@ -126,9 +85,23 @@ export default function Map({ vehicles, selectedVehicle, onVehicleSelect }: MapP
         .leaflet-container {
           background: transparent;
         }
-        .custom-marker {
+        .modern-marker {
           background: none !important;
           border: none !important;
+        }
+        @keyframes pulse {
+          0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.3;
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0.1;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.3;
+          }
         }
       `}</style>
     </div>

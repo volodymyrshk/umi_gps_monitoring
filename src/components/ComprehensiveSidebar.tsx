@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Vehicle, VehicleFilter } from '@/types/vehicle';
-import VehicleCard from './VehicleCard';
+import ExpandableVehicleCard from './ExpandableVehicleCard';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 import { 
   Menu, X, ChevronDown, ChevronRight, Calendar, 
   Users, MapPin, Fuel, Settings, AlertTriangle,
@@ -188,32 +191,32 @@ export default function ComprehensiveSidebar({
           {/* Simple Filters Dropdown */}
           {showFilters && (
             <div className="px-4 pb-3">
-              <div className="bg-gray-50 rounded-lg p-2">
+              <div className="bg-muted rounded-lg p-2">
                 <div className="flex items-center justify-between space-x-2">
-                  <button
+                  <Button
                     onClick={() => {setActiveFilter('all'); onFilterChange({});}}
-                    className={`flex-1 px-2 py-1 rounded text-xs transition-colors ${
-                      activeFilter === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                    }`}
+                    variant={activeFilter === 'all' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="flex-1 text-xs"
                   >
                     Все
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => {setActiveFilter('online'); onFilterChange({status: 'online'});}}
-                    className={`flex-1 px-2 py-1 rounded text-xs transition-colors ${
-                      activeFilter === 'online' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                    }`}
+                    variant={activeFilter === 'online' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="flex-1 text-xs"
                   >
                     Активные
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => {setActiveFilter('warning'); onFilterChange({status: 'warning'});}}
-                    className={`flex-1 px-2 py-1 rounded text-xs transition-colors ${
-                      activeFilter === 'warning' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                    }`}
+                    variant={activeFilter === 'warning' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="flex-1 text-xs"
                   >
                     Проблемы
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -242,14 +245,14 @@ export default function ComprehensiveSidebar({
 
         {/* Vehicle List */}
         {folderExpanded && (
-          <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4 space-y-2">
-          {getFilteredVehicles().map((vehicle) => (
-            <VehicleCard
-              key={vehicle.id}
-              vehicle={vehicle}
-              isSelected={selectedVehicle?.id === vehicle.id}
-              onClick={onVehicleSelect}
-            />
+          <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4 space-y-4">
+            {getFilteredVehicles().map((vehicle) => (
+              <ExpandableVehicleCard
+                key={vehicle.id}
+                vehicle={vehicle}
+                isSelected={selectedVehicle?.id === vehicle.id}
+                onClick={onVehicleSelect}
+              />
             ))}
           </div>
         )}

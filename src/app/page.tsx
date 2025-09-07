@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import ModernHeader from '@/components/ModernHeader';
+import DockHeader from '@/components/DockHeader';
 import ComprehensiveSidebar from '@/components/ComprehensiveSidebar';
 import { useState } from 'react';
 import { Vehicle, VehicleFilter } from '@/types/vehicle';
@@ -48,7 +48,7 @@ export default function Home() {
       </div>
       
       {/* Floating UI elements */}
-      <ModernHeader onMenuClick={() => setSidebarOpen(true)} />
+      <DockHeader onMenuClick={() => setSidebarOpen(true)} />
       
       <ComprehensiveSidebar 
         vehicles={filteredVehicles}

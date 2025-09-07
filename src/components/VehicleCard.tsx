@@ -1,6 +1,8 @@
 import { Vehicle } from '@/types/vehicle';
 import { MapPin, Battery, Clock, Fuel, Eye, ChevronDown, Zap, Activity, Gauge, Thermometer, Timer, CreditCard, User, Navigation } from 'lucide-react';
 import { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -28,10 +30,11 @@ export default function VehicleCard({ vehicle, isSelected, onClick }: VehicleCar
   };
 
   return (
-    <div 
-      className={`bg-white rounded-xl border border-gray-100 cursor-pointer transition-all hover:shadow-md hover:shadow-gray-200/50 ${
+    <Card 
+      className={cn(
+        "cursor-pointer transition-all hover:shadow-md hover:shadow-gray-200/50",
         isSelected ? 'ring-2 ring-blue-500 shadow-md shadow-blue-200/20' : 'shadow-sm'
-      }`}
+      )}
       onClick={handleCardClick}
     >
       {/* Single line layout for collapsed state */}
@@ -63,7 +66,7 @@ export default function VehicleCard({ vehicle, isSelected, onClick }: VehicleCar
 
       {/* Expanded layout */}
       {isExpanded && (
-        <div className="p-4">
+        <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-3 flex-1">
               {/* John Deere Logo */}
@@ -193,8 +196,8 @@ export default function VehicleCard({ vehicle, isSelected, onClick }: VehicleCar
               </div>
             </div>
           </div>
-        </div>
+        </CardContent>
       )}
-    </div>
+    </Card>
   );
 }

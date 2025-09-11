@@ -1,4 +1,4 @@
-import { Search, User, Map, BarChart3, FileText, PieChart } from 'lucide-react';
+import { Search, User, Map, BarChart3, FileText, PieChart, Route } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,13 +14,16 @@ import { cn } from '@/lib/utils';
 
 interface DockHeaderProps {
   onMenuClick?: () => void;
+  showPaths?: boolean;
+  onTogglePaths?: (show: boolean) => void;
 }
 
-export default function DockHeader({ onMenuClick }: DockHeaderProps) {
+export default function DockHeader({ onMenuClick, showPaths, onTogglePaths }: DockHeaderProps) {
   const [activeMode, setActiveMode] = useState('navigation');
 
   const navigationItems = [
     { id: 'navigation', icon: Map, label: 'Навигация' },
+    { id: 'paths', icon: Route, label: 'История движения' },
     { id: 'dashboard', icon: BarChart3, label: 'Дашборд' },
     { id: 'analytics', icon: PieChart, label: 'Аналитика' },
     { id: 'reports', icon: FileText, label: 'Отчеты' },
@@ -55,7 +58,12 @@ export default function DockHeader({ onMenuClick }: DockHeaderProps) {
                   <Tooltip key={item.id}>
                     <TooltipTrigger asChild>
                       <Button
-                        onClick={() => setActiveMode(item.id)}
+                        onClick={() => {
+                          setActiveMode(item.id);
+                          if (item.id === 'paths' && onTogglePaths) {
+                            onTogglePaths(!showPaths);
+                          }
+                        }}
                         variant={activeMode === item.id ? 'default' : 'ghost'}
                         size="sm"
                         className={cn(

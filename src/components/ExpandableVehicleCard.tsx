@@ -1,4 +1,4 @@
-import { Vehicle } from '@/types/vehicle';
+import { Vehicle } from '@/lib/entities/vehicle';
 import { 
   MapPin, Battery, Clock, Fuel, ChevronDown, Zap, 
   Gauge, Thermometer, Timer, CreditCard, User, Navigation,
@@ -93,8 +93,8 @@ export default function ExpandableVehicleCard({ vehicle, isSelected, onClick }: 
             </div>
             
             <div className="flex items-center space-x-2 flex-shrink-0">
-              <Badge variant="secondary" className={getStatusColor(vehicle.status)}>
-                {getStatusText(vehicle.status)}
+              <Badge variant="secondary" className={getStatusColor(vehicle.status?.status || vehicle.status)}>
+                {getStatusText(vehicle.status?.status || vehicle.status)}
               </Badge>
               <div className={`w-6 h-3 rounded ${getBatteryColor(vehicle.battery)}`}>
                 <div 
@@ -154,7 +154,7 @@ export default function ExpandableVehicleCard({ vehicle, isSelected, onClick }: 
                   transition={{ delay: 0.3 }}
                 >
                   <MapPin className="w-4 h-4" />
-                  <span className="truncate">{vehicle.location.address}</span>
+                  <span className="truncate">{vehicle.currentLocation.address || `${vehicle.currentLocation.latitude.toFixed(4)}, ${vehicle.currentLocation.longitude.toFixed(4)}`}</span>
                 </motion.div>
 
                 {/* Status Grid - More compact */}
@@ -185,7 +185,7 @@ export default function ExpandableVehicleCard({ vehicle, isSelected, onClick }: 
                       <span className="text-xs text-muted-foreground">{vehicle.roadTime || 0}ч в дороге</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      {vehicle.status === 'online' ? (
+                      {(vehicle.status?.status || vehicle.status) === 'online' ? (
                         <Wifi className="w-3 h-3 text-green-500" />
                       ) : (
                         <WifiOff className="w-3 h-3 text-red-500" />
@@ -233,9 +233,9 @@ export default function ExpandableVehicleCard({ vehicle, isSelected, onClick }: 
                 >
                   <Button 
                     className="w-full" 
-                    variant={vehicle.status === 'online' ? 'default' : 'secondary'}
+                    variant={(vehicle.status?.status || vehicle.status) === 'online' ? 'default' : 'secondary'}
                   >
-                    {vehicle.status === 'online' ? 'Показать на карте' : 'Диагностика'}
+                    {(vehicle.status?.status || vehicle.status) === 'online' ? 'Показать на карте' : 'Диагностика'}
                   </Button>
                 </motion.div>
               </CardContent>

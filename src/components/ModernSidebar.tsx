@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Vehicle, VehicleFilter } from '@/types/vehicle';
+import { Vehicle, VehicleFilter } from '@/lib/entities/vehicle';
 import VehicleCard from './VehicleCard';
 import { Filter, Calendar, Menu, X, ChevronDown } from 'lucide-react';
 

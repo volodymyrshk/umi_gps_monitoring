@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Vehicle, VehicleFilter } from '@/types/vehicle';
+import { useState, useEffect, useRef } from 'react';
+import { Vehicle, VehicleFilter } from '@/lib/entities/vehicle';
 import ExpandableVehicleCard from './ExpandableVehicleCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,7 +7,8 @@ import { cn } from '@/lib/utils';
 import { 
   Menu, X, ChevronDown, ChevronRight, Calendar, 
   Users, MapPin, Fuel, Settings, AlertTriangle,
-  Truck, Car, Wrench, FileText, Map, Layers, Filter
+  Truck, Car, Wrench, FileText, Map, Layers, Filter,
+  Clock, History, Play, Route, CheckSquare
 } from 'lucide-react';
 
 interface ComprehensiveSidebarProps {
@@ -17,6 +18,9 @@ interface ComprehensiveSidebarProps {
   onFilterChange: (filters: VehicleFilter) => void;
   isOpen?: boolean;
   onClose?: () => void;
+  pathQuery?: any;
+  onPathQueryChange?: (query: any) => void;
+  showPaths?: boolean;
 }
 
 interface MenuCategory {
@@ -39,11 +43,36 @@ export default function ComprehensiveSidebar({
   onVehicleSelect, 
   onFilterChange, 
   isOpen, 
-  onClose 
+  onClose,
+  pathQuery,
+  onPathQueryChange,
+  showPaths
 }: ComprehensiveSidebarProps) {
   const [folderExpanded, setFolderExpanded] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>('all');
+  const vehicleListRef = useRef<HTMLDivElement>(null);
+  
+  // Scroll to selected vehicle when it changes
+  useEffect(() => {
+    if (selectedVehicle && vehicleListRef.current && folderExpanded) {
+      const vehicleElement = vehicleListRef.current.querySelector(`[data-vehicle-id="${selectedVehicle.id}"]`);
+      if (vehicleElement) {
+        vehicleElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest'
+        });
+      }
+    }
+  }, [selectedVehicle, folderExpanded]);
+  
+  // Path tracking state
+  const [showPathControls, setShowPathControls] = useState(false);
+  const [selectedVehiclesForPath, setSelectedVehiclesForPath] = useState<string[]>([]);
+  const [timeRange, setTimeRange] = useState<string>('today');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string>('objects');
   const [menuCategories, setMenuCategories] = useState<MenuCategory[]>([
     {
       id: 'objects',
@@ -245,41 +274,193 @@ export default function ComprehensiveSidebar({
 
         {/* Vehicle List */}
         {folderExpanded && (
-          <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4 space-y-4">
+          <div ref={vehicleListRef} className="flex-1 overflow-y-auto px-4 pt-2 pb-4 space-y-4">
             {getFilteredVehicles().map((vehicle) => (
-              <ExpandableVehicleCard
-                key={vehicle.id}
-                vehicle={vehicle}
-                isSelected={selectedVehicle?.id === vehicle.id}
-                onClick={onVehicleSelect}
-              />
+              <div key={vehicle.id} data-vehicle-id={vehicle.id}>
+                <ExpandableVehicleCard
+                  vehicle={vehicle}
+                  isSelected={selectedVehicle?.id === vehicle.id}
+                  onClick={onVehicleSelect}
+                />
+              </div>
             ))}
           </div>
         )}
 
-        {/* Enhanced Footer with Calendar and Simplified Stats */}
+        {/* Enhanced Footer with Path Tracking and Stats */}
         <div className="p-4 border-t border-gray-100/50 space-y-3">
-          {/* Calendar Section */}
-          <div className="bg-gray-50 rounded-xl p-3">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-gray-700">Период</span>
-              <Calendar className="w-3 h-3 text-gray-500" />
-            </div>
-            <div className="text-xs font-medium text-gray-600 cursor-pointer hover:text-blue-600 transition-colors">
-              17 Авг 2024 – 23 Авг 2024
-            </div>
-            <div className="text-xs text-gray-500 mt-1">
-              7 дней выбрано
-            </div>
+          
+          {/* Path Tracking Toggle */}
+          <div className="flex items-center justify-between">
+            <Button
+              variant={showPaths ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                console.log('Path controls toggle clicked, current state:', showPathControls);
+                setShowPathControls(!showPathControls);
+              }}
+              className="flex items-center space-x-2"
+            >
+              <Route className="w-4 h-4" />
+              <span>История движения</span>
+            </Button>
           </div>
+
+          {/* Path Controls - Show when enabled */}
+          {showPathControls && (
+            <div className="bg-gray-50 rounded-xl p-3 space-y-3">
+              {/* Time Range Selection */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-gray-700">Период</span>
+                  <Calendar className="w-3 h-3 text-gray-500" />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-1 mb-2">
+                  {[
+                    { key: 'today', label: 'Сегодня' },
+                    { key: 'yesterday', label: 'Вчера' },
+                    { key: 'week', label: '7 дней' },
+                    { key: 'custom', label: 'Выбрать' }
+                  ].map(option => (
+                    <button
+                      key={option.key}
+                      onClick={() => setTimeRange(option.key)}
+                      className={`text-xs py-1 px-2 rounded transition-colors ${
+                        timeRange === option.key 
+                          ? 'bg-blue-100 text-blue-700 font-medium' 
+                          : 'bg-white text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom Date Range */}
+                {timeRange === 'custom' && (
+                  <div className="space-y-2">
+                    <input
+                      type="datetime-local"
+                      value={customStartDate}
+                      onChange={(e) => setCustomStartDate(e.target.value)}
+                      className="w-full text-xs p-1 border border-gray-200 rounded"
+                      placeholder="Начало"
+                    />
+                    <input
+                      type="datetime-local"
+                      value={customEndDate}
+                      onChange={(e) => setCustomEndDate(e.target.value)}
+                      className="w-full text-xs p-1 border border-gray-200 rounded"
+                      placeholder="Конец"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Vehicle Selection for Path */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-gray-700">Транспорт</span>
+                  <CheckSquare className="w-3 h-3 text-gray-500" />
+                </div>
+                
+                <div className="max-h-32 overflow-y-auto space-y-1">
+                  {vehicles.slice(0, 5).map(vehicle => (
+                    <label key={vehicle.id} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedVehiclesForPath.includes(vehicle.id)}
+                        onChange={(e) => {
+                          console.log('Vehicle selection changed:', vehicle.id, 'checked:', e.target.checked);
+                          if (e.target.checked) {
+                            const newSelection = [...selectedVehiclesForPath, vehicle.id];
+                            console.log('New selection:', newSelection);
+                            setSelectedVehiclesForPath(newSelection);
+                          } else {
+                            const newSelection = selectedVehiclesForPath.filter(id => id !== vehicle.id);
+                            console.log('New selection after removal:', newSelection);
+                            setSelectedVehiclesForPath(newSelection);
+                          }
+                        }}
+                        className="w-3 h-3 text-blue-600"
+                      />
+                      <span className="text-xs text-gray-700 truncate">
+                        {vehicle.name.split(' ').slice(0, 2).join(' ')}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Apply Button */}
+              <Button
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  console.log('Show paths button clicked');
+                  console.log('Selected vehicles:', selectedVehiclesForPath);
+                  console.log('Time range:', timeRange);
+                  console.log('onPathQueryChange exists:', !!onPathQueryChange);
+                  
+                  if (onPathQueryChange) {
+                    const startTime = timeRange === 'custom' && customStartDate 
+                      ? new Date(customStartDate)
+                      : timeRange === 'yesterday'
+                      ? new Date(Date.now() - 24 * 60 * 60 * 1000)
+                      : timeRange === 'week'
+                      ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                      : new Date(new Date().setHours(0, 0, 0, 0));
+                      
+                    const endTime = timeRange === 'custom' && customEndDate
+                      ? new Date(customEndDate)
+                      : new Date();
+
+                    console.log('Calling onPathQueryChange with:', {
+                      vehicleIds: selectedVehiclesForPath,
+                      startTime,
+                      endTime,
+                      resolution: 'medium'
+                    });
+
+                    onPathQueryChange({
+                      vehicleIds: selectedVehiclesForPath,
+                      startTime,
+                      endTime,
+                      resolution: 'medium'
+                    });
+                  } else {
+                    console.error('onPathQueryChange is not provided');
+                  }
+                }}
+                disabled={selectedVehiclesForPath.length === 0}
+              >
+                <Play className="w-3 h-3 mr-1" />
+                Показать пути
+              </Button>
+            </div>
+          )}
+
+          {/* Standard Calendar Display when not in path mode */}
+          {!showPathControls && (
+            <div className="bg-gray-50 rounded-xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold text-gray-700">Период</span>
+                <Calendar className="w-3 h-3 text-gray-500" />
+              </div>
+              <div className="text-xs font-medium text-gray-600">
+                Сегодня - {new Date().toLocaleDateString('ru-RU')}
+              </div>
+            </div>
+          )}
           
           {/* Simplified Stats - Just text */}
           <div className="flex items-center justify-between text-xs">
             <span className="text-green-600 font-medium">
-              Активных: {vehicles.filter(v => v.status === 'online').length}
+              Активных: {vehicles.filter(v => (v.status?.status || v.status) === 'online').length}
             </span>
             <span className="text-red-600 font-medium">
-              Проблемы: {vehicles.filter(v => v.status === 'warning').length}
+              Проблемы: {vehicles.filter(v => (v.status?.status || v.status) === 'warning').length}
             </span>
           </div>
           

@@ -1,4 +1,4 @@
-import { Vehicle } from '@/types/vehicle';
+import { Vehicle } from '@/lib/entities/vehicle';
 import { 
   MapPin, Battery, Clock, Fuel, Gauge, 
   Thermometer, Timer, Zap, User, Calendar

@@ -1,4 +1,4 @@
-import { Vehicle } from '@/types/vehicle';
+import { Vehicle } from '@/lib/entities/vehicle';
 import { MapPin, Battery, Clock, Fuel, Eye, ChevronDown, Zap, Activity, Gauge, Thermometer, Timer, CreditCard, User, Navigation } from 'lucide-react';
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';

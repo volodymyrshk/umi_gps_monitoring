@@ -8,7 +8,7 @@ interface MapControlsProps {
 
 export default function MapControls({ onZoomIn, onZoomOut, onFullscreen }: MapControlsProps) {
   return (
-    <div className="fixed right-4 top-20 z-[1000] space-y-1">
+    <div className="space-y-1">
       {/* Primary Controls */}
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg shadow-gray-900/10 border border-white/20 p-1.5 space-y-0.5">
         <button 

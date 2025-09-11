@@ -38,7 +38,7 @@ function MapUpdater({ selectedVehicle, pathSegments, showPaths }: {
   // Auto-zoom to paths when displayed
   useEffect(() => {
     if (showPaths && pathSegments && pathSegments.length > 0) {
-      console.log('Auto-zooming to paths');
+      // console.log('Auto-zooming to paths');
       
       // Collect all coordinates from all path segments
       const allCoords: [number, number][] = [];
@@ -111,6 +111,11 @@ export default function Map({ vehicles, selectedVehicle, onVehicleSelect, showPa
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           subdomains={['a', 'b', 'c', 'd']}
           maxZoom={20}
+          minZoom={2}
+          keepBuffer={4}
+          updateWhenZooming={false}
+          updateWhenIdle={true}
+          className="map-tiles"
         />
         
         <MapUpdater 
@@ -132,38 +137,19 @@ export default function Map({ vehicles, selectedVehicle, onVehicleSelect, showPa
           />
         ))}
         
-        {/* Test Polyline - Always visible */}
-        <Polyline
-          positions={[
-            [50.4501, 30.5234],
-            [50.4601, 30.5334],
-            [50.4701, 30.5434]
-          ]}
-          color="red"
-          weight={10}
-          opacity={1.0}
-        />
         
         {/* Render Path Lines */}
-        {(() => {
-          console.log('Map render - showPaths:', showPaths);
-          console.log('Map render - pathSegments:', pathSegments);
-          return null;
-        })()}
         
         {showPaths && pathSegments && pathSegments.map((segment) => {
-          console.log('Processing segment:', segment.id, 'with', segment.points?.length, 'points');
           
           const pathPoints = segment.points || [];
           if (pathPoints.length < 2) {
-            console.log('Segment has too few points:', pathPoints.length);
             return null;
           }
           
           const coordinates = pathPoints.map((point: any) => {
             const lat = point.location?.latitude || point.lat;
             const lng = point.location?.longitude || point.lng;
-            console.log('Point coordinates:', lat, lng);
             return [lat, lng];
           }).filter(coord => coord[0] && coord[1]);
           
@@ -199,15 +185,19 @@ export default function Map({ vehicles, selectedVehicle, onVehicleSelect, showPa
         })}
       </MapContainer>
       
-      <MapControls 
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onFullscreen={handleFullscreen}
-      />
       
       <style jsx global>{`
         .leaflet-container {
-          background: transparent;
+          background: #f8f9fa !important;
+        }
+        .map-tiles {
+          background: #f8f9fa !important;
+        }
+        .leaflet-tile-container {
+          background: #f8f9fa !important;
+        }
+        .leaflet-tile {
+          background: #f8f9fa !important;
         }
         .modern-marker {
           background: none !important;

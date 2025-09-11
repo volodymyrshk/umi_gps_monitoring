@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Marker, useMap } from 'react-leaflet';
 import { Vehicle } from '@/lib/entities/vehicle';
-import VehicleMapPopover from './VehicleMapPopover';
+import VehiclePopup from './VehiclePopup';
 import L from 'leaflet';
 import { createPortal } from 'react-dom';
 
@@ -72,6 +72,8 @@ export default function VehicleMarker({ vehicle, isSelected, onVehicleSelect, is
   const currentLocation = vehicle.currentLocation || vehicle.location;
   const vehicleStatus = vehicle.status?.status || vehicle.status;
 
+  const [popupDirection, setPopupDirection] = useState<'top' | 'bottom' | 'left' | 'right'>('top');
+
   // Update popup position when marker position changes or map moves
   const updatePopupPosition = () => {
     if (markerRef.current && popupOpen) {
@@ -80,36 +82,56 @@ export default function VehicleMarker({ vehicle, isSelected, onVehicleSelect, is
       const mapContainer = map.getContainer();
       const mapBounds = mapContainer.getBoundingClientRect();
       
-      // Popup dimensions (approximate)
-      const popupWidth = 320;
-      const popupHeight = 300;
-      const offset = 40;
+      // Popup dimensions (compact popup)
+      const popupWidth = 384; // w-96 = 24rem = 384px
+      const popupHeight = 250; // Much smaller now
+      const offset = 30;
       
-      // Navbar height (from your screenshot, looks like about 60px)
-      const navbarHeight = 60;
+      // Navbar height and sidebar width
+      const navbarHeight = 80;
+      const sidebarWidth = 400;
       
       let x = point.x;
-      let y = point.y - offset; // Default: above marker
+      let y = point.y;
+      let direction: 'top' | 'bottom' | 'left' | 'right' = 'top';
       
-      // Convert map-relative coordinates to viewport coordinates for navbar check
+      // Convert map-relative coordinates to viewport coordinates
       const viewportY = mapBounds.top + y;
+      const viewportX = mapBounds.left + x;
       
-      // Vertical positioning - check if popup would overlap with navbar
-      if (viewportY - popupHeight < navbarHeight) {
-        // Position below marker instead
+      // Determine best positioning based on available space
+      const spaceTop = viewportY - navbarHeight;
+      const spaceBottom = window.innerHeight - viewportY;
+      const spaceLeft = viewportX - sidebarWidth;
+      const spaceRight = window.innerWidth - viewportX;
+      
+      // Choose position with most space
+      if (spaceRight >= popupWidth + offset && spaceRight > spaceLeft) {
+        direction = 'right';
+        x = point.x + offset;
+        y = point.y - popupHeight / 2;
+      } else if (spaceLeft >= popupWidth + offset) {
+        direction = 'left';
+        x = point.x - offset;
+        y = point.y - popupHeight / 2;
+      } else if (spaceBottom >= popupHeight + offset && spaceBottom > spaceTop) {
+        direction = 'bottom';
+        x = point.x - popupWidth / 2;
         y = point.y + offset;
-        console.log(`Popup would overlap navbar (viewportY: ${viewportY}, popupHeight: ${popupHeight}, navbarHeight: ${navbarHeight}), positioning below marker`);
+      } else {
+        direction = 'top';
+        x = point.x - popupWidth / 2;
+        y = point.y - offset;
       }
       
-      // Horizontal positioning
-      if (x - popupWidth/2 < 10) {
-        // Too close to left edge
-        x = popupWidth/2 + 10;
-      } else if (x + popupWidth/2 > mapBounds.width - 10) {
-        // Too close to right edge
-        x = mapBounds.width - popupWidth/2 - 10;
+      // Ensure popup stays within bounds
+      if (direction === 'left' || direction === 'right') {
+        y = Math.max(10, Math.min(y, mapBounds.height - popupHeight - 10));
+      } else {
+        x = Math.max(10, Math.min(x, mapBounds.width - popupWidth - 10));
       }
       
+      setPopupDirection(direction);
       setPopupPosition({ x, y });
     }
   };
@@ -152,16 +174,16 @@ export default function VehicleMarker({ vehicle, isSelected, onVehicleSelect, is
           style={{
             left: `${popupPosition.x}px`,
             top: `${popupPosition.y}px`,
-            transform: 'translate(-50%, -100%)'
+            transform: popupDirection === 'top' ? 'translate(-50%, -100%)' :
+                      popupDirection === 'bottom' ? 'translate(-50%, 0%)' :
+                      popupDirection === 'left' ? 'translate(-100%, -50%)' :
+                      'translate(0%, -50%)'
           }}
         >
           <div className="pointer-events-auto">
-            <VehicleMapPopover 
+            <VehiclePopup 
               vehicle={vehicle} 
-              onSelectVehicle={(selectedVehicle) => {
-                onVehicleSelect(selectedVehicle);
-                onPopupToggle?.(false);
-              }}
+              position={popupDirection}
               onClose={() => onPopupToggle?.(false)}
             />
           </div>

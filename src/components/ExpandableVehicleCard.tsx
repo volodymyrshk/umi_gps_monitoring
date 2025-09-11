@@ -67,7 +67,7 @@ export default function ExpandableVehicleCard({ vehicle, isSelected, onClick }: 
       <Card 
         className={cn(
           "cursor-pointer transition-all hover:shadow-md hover:shadow-gray-200/50 overflow-hidden",
-          isSelected ? 'ring-2 ring-primary shadow-md shadow-primary/20' : 'shadow-sm'
+          isSelected ? 'ring-2 ring-gray-300 shadow-md shadow-gray-200/50 bg-gray-50/50' : 'shadow-sm'
         )}
         onClick={handleCardClick}
       >
@@ -76,10 +76,12 @@ export default function ExpandableVehicleCard({ vehicle, isSelected, onClick }: 
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3 flex-1 min-w-0">
               {/* John Deere Logo */}
-              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <div className="w-6 h-4 bg-yellow-400 rounded-sm flex items-center justify-center">
-                  <div className="w-3 h-2 bg-green-600 rounded-sm"></div>
-                </div>
+              <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 bg-white border border-gray-200">
+                <img 
+                  src="/JohnDeere.jpeg" 
+                  alt="John Deere" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               
               <div className="flex-1 min-w-0">

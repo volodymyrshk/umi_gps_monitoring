@@ -3,7 +3,6 @@
 import dynamic from 'next/dynamic';
 import DockHeader from '@/components/DockHeader';
 import ComprehensiveSidebar from '@/components/ComprehensiveSidebar';
-import DPLVehiclePanel from '@/components/DPLVehiclePanel';
 import { useState, useEffect } from 'react';
 import { vehicleService } from '@/lib/services';
 import { Vehicle, VehicleFilter } from '@/lib/entities/vehicle';
@@ -11,6 +10,7 @@ import { PathQuery, PathSegment } from '@/lib/services/path-tracking';
 import { PathDataGenerator } from '@/lib/generators/path-generator';
 import { getSelectedVehicleDPLPath } from '@/lib/dpl-paths';
 import { mockVehicles } from '@/data/vehicles';
+import MapControls from '@/components/MapControls';
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false });
 
@@ -19,6 +19,7 @@ export default function Home() {
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mapInstance, setMapInstance] = useState<any>(null);
   
   // Path tracking state
   const [showPaths, setShowPaths] = useState(false);
@@ -110,6 +111,25 @@ export default function Home() {
     } else {
       // Clear DPL paths when no vehicle selected
       setDplPaths([]);
+      setShowPaths(false); // Also hide paths when no vehicle selected
+    }
+  };
+
+  const handleZoomIn = () => {
+    if (mapInstance) {
+      mapInstance.zoomIn();
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (mapInstance) {
+      mapInstance.zoomOut();
+    }
+  };
+
+  const handleFullscreen = () => {
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen();
     }
   };
 
@@ -122,17 +142,18 @@ export default function Home() {
           selectedVehicle={selectedVehicle}
           onVehicleSelect={handleVehicleSelect}
           showPaths={showPaths}
-          pathSegments={[...pathSegments, ...dplPaths]}
+          pathSegments={showPaths ? [...pathSegments, ...dplPaths] : []}
         />
       </div>
       
-      {/* Floating UI elements */}
+      {/* Top Header */}
       <DockHeader 
         onMenuClick={() => setSidebarOpen(true)}
         showPaths={showPaths}
         onTogglePaths={setShowPaths}
       />
       
+      {/* Sidebar */}
       <ComprehensiveSidebar 
         vehicles={filteredVehicles}
         selectedVehicle={selectedVehicle}
@@ -144,20 +165,15 @@ export default function Home() {
         onPathQueryChange={handlePathQueryChange}
         showPaths={showPaths}
       />
-      
-      {/* DPL Vehicle Panel - appears when vehicle is selected */}
-      {selectedVehicle && (
-        <div className="fixed right-4 top-16 bottom-4 w-80 z-[1001] lg:block hidden">
-          <DPLVehiclePanel vehicleId={selectedVehicle.id} />
-        </div>
-      )}
-      
-      {/* Mobile DPL Panel */}
-      {selectedVehicle && (
-        <div className="fixed inset-x-4 bottom-4 top-20 z-[1001] lg:hidden">
-          <DPLVehiclePanel vehicleId={selectedVehicle.id} />
-        </div>
-      )}
+
+      {/* Map Controls positioned on map next to sidebar */}
+      <div className="fixed left-[415px] top-[80px] z-[1000]">
+        <MapControls 
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onFullscreen={handleFullscreen}
+        />
+      </div>
 
       {sidebarOpen && (
         <div 

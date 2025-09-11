@@ -2,13 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { Vehicle, VehicleFilter } from '@/lib/entities/vehicle';
 import ExpandableVehicleCard from './ExpandableVehicleCard';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
 import { 
-  Menu, X, ChevronDown, ChevronRight, Calendar, 
-  Users, MapPin, Fuel, Settings, AlertTriangle,
+  Menu, X, ChevronDown, Calendar, 
+  Users, MapPin, Settings, AlertTriangle,
   Truck, Car, Wrench, FileText, Map, Layers, Filter,
-  Clock, History, Play, Route, CheckSquare
+  Folder, FolderOpen
 } from 'lucide-react';
 
 interface ComprehensiveSidebarProps {
@@ -49,6 +47,7 @@ export default function ComprehensiveSidebar({
   showPaths
 }: ComprehensiveSidebarProps) {
   const [folderExpanded, setFolderExpanded] = useState(true);
+  const [secondFolderExpanded, setSecondFolderExpanded] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const vehicleListRef = useRef<HTMLDivElement>(null);
@@ -251,195 +250,110 @@ export default function ComprehensiveSidebar({
             </div>
           )}
 
-          {/* Folder: Tariff August 2024 */}
-          <button 
-            onClick={() => setFolderExpanded(!folderExpanded)}
-            className="w-full bg-gray-50 hover:bg-gray-100 rounded-xl p-3 transition-colors"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-5 h-5 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <FileText className="w-3 h-3 text-orange-600" />
-                </div>
-                <span className="text-sm font-bold text-gray-900">Тарировка Август 2024</span>
-                <span className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-lg text-xs font-medium">{vehicles.length}</span>
-              </div>
-              {folderExpanded ? 
-                <ChevronDown className="w-3 h-3 text-gray-500" /> : 
-                <ChevronRight className="w-3 h-3 text-gray-500" />
-              }
-            </div>
-          </button>
         </div>
 
-        {/* Vehicle List */}
-        {folderExpanded && (
-          <div ref={vehicleListRef} className="flex-1 overflow-y-auto px-4 pt-2 pb-4 space-y-4">
-            {getFilteredVehicles().map((vehicle) => (
-              <div key={vehicle.id} data-vehicle-id={vehicle.id}>
-                <ExpandableVehicleCard
-                  vehicle={vehicle}
-                  isSelected={selectedVehicle?.id === vehicle.id}
-                  onClick={onVehicleSelect}
-                />
+        {/* Folder Structure */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {/* First Folder: Tariff August 2024 */}
+          <div className="mb-2">
+            <button 
+              onClick={() => setFolderExpanded(!folderExpanded)}
+              className="w-full text-left flex items-center space-x-2 py-2 px-2 hover:bg-gray-50 rounded-md transition-colors group"
+            >
+              {folderExpanded ? (
+                <FolderOpen className="w-4 h-4 text-gray-600 flex-shrink-0" />
+              ) : (
+                <Folder className="w-4 h-4 text-gray-600 flex-shrink-0" />
+              )}
+              <span className="text-sm font-medium text-gray-900 flex-1">Тарировка Август 2024</span>
+              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{vehicles.length}</span>
+            </button>
+            
+            {/* Vehicle List for First Folder */}
+            {folderExpanded && (
+              <div className="ml-4 relative">
+                {/* Tree line */}
+                <div className="absolute left-2 top-0 bottom-0 w-px bg-gray-200"></div>
+                
+                <div ref={vehicleListRef} className="space-y-2 pt-2">
+                  {getFilteredVehicles().map((vehicle, index) => (
+                    <div key={vehicle.id} data-vehicle-id={vehicle.id} className="relative">
+                      {/* Tree connector */}
+                      <div className="absolute left-2 top-4 w-3 h-px bg-gray-200"></div>
+                      <div className="ml-6 pl-2">
+                        <ExpandableVehicleCard
+                          vehicle={vehicle}
+                          isSelected={selectedVehicle?.id === vehicle.id}
+                          onClick={onVehicleSelect}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
           </div>
-        )}
+
+          {/* Second Folder: Historical Data */}
+          <div className="mb-2">
+            <button 
+              onClick={() => setSecondFolderExpanded(!secondFolderExpanded)}
+              className="w-full text-left flex items-center space-x-2 py-2 px-2 hover:bg-gray-50 rounded-md transition-colors group"
+            >
+              {secondFolderExpanded ? (
+                <FolderOpen className="w-4 h-4 text-gray-600 flex-shrink-0" />
+              ) : (
+                <Folder className="w-4 h-4 text-gray-600 flex-shrink-0" />
+              )}
+              <span className="text-sm font-medium text-gray-900 flex-1">Архивные данные</span>
+              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">2</span>
+            </button>
+            
+            {/* Archive List for Second Folder */}
+            {secondFolderExpanded && (
+              <div className="ml-4 relative">
+                {/* Tree line */}
+                <div className="absolute left-2 top-0 bottom-0 w-px bg-gray-200"></div>
+                
+                <div className="space-y-1 pt-2">
+                  <div className="relative">
+                    <div className="absolute left-2 top-4 w-3 h-px bg-gray-200"></div>
+                    <div className="ml-6 pl-2 flex items-center space-x-2 py-2 hover:bg-gray-50 rounded-md cursor-pointer">
+                      <Folder className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                      <span className="text-sm text-gray-700">Тарировка Июль 2024</span>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <div className="absolute left-2 top-4 w-3 h-px bg-gray-200"></div>
+                    <div className="ml-6 pl-2 flex items-center space-x-2 py-2 hover:bg-gray-50 rounded-md cursor-pointer">
+                      <Folder className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                      <span className="text-sm text-gray-700">Тарировка Июнь 2024</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Additional Folders to match reference */}
+          <div className="mb-2">
+            <button className="w-full text-left flex items-center space-x-2 py-2 px-2 hover:bg-gray-50 rounded-md transition-colors group">
+              <Folder className="w-4 h-4 text-gray-600 flex-shrink-0" />
+              <span className="text-sm font-medium text-gray-900 flex-1">Данные телеметрии</span>
+            </button>
+          </div>
+
+          <div className="mb-2">
+            <button className="w-full text-left flex items-center space-x-2 py-2 px-2 hover:bg-gray-50 rounded-md transition-colors group">
+              <Folder className="w-4 h-4 text-gray-600 flex-shrink-0" />
+              <span className="text-sm font-medium text-gray-900 flex-1">Отчеты работы</span>
+            </button>
+          </div>
+        </div>
 
         {/* Enhanced Footer with Path Tracking and Stats */}
         <div className="p-4 border-t border-gray-100/50 space-y-3">
           
-          {/* Path Tracking Toggle */}
-          <div className="flex items-center justify-between">
-            <Button
-              variant={showPaths ? "default" : "outline"}
-              size="sm"
-              onClick={() => {
-                console.log('Path controls toggle clicked, current state:', showPathControls);
-                setShowPathControls(!showPathControls);
-              }}
-              className="flex items-center space-x-2"
-            >
-              <Route className="w-4 h-4" />
-              <span>История движения</span>
-            </Button>
-          </div>
-
-          {/* Path Controls - Show when enabled */}
-          {showPathControls && (
-            <div className="bg-gray-50 rounded-xl p-3 space-y-3">
-              {/* Time Range Selection */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-gray-700">Период</span>
-                  <Calendar className="w-3 h-3 text-gray-500" />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-1 mb-2">
-                  {[
-                    { key: 'today', label: 'Сегодня' },
-                    { key: 'yesterday', label: 'Вчера' },
-                    { key: 'week', label: '7 дней' },
-                    { key: 'custom', label: 'Выбрать' }
-                  ].map(option => (
-                    <button
-                      key={option.key}
-                      onClick={() => setTimeRange(option.key)}
-                      className={`text-xs py-1 px-2 rounded transition-colors ${
-                        timeRange === option.key 
-                          ? 'bg-blue-100 text-blue-700 font-medium' 
-                          : 'bg-white text-gray-600 hover:bg-gray-100'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Custom Date Range */}
-                {timeRange === 'custom' && (
-                  <div className="space-y-2">
-                    <input
-                      type="datetime-local"
-                      value={customStartDate}
-                      onChange={(e) => setCustomStartDate(e.target.value)}
-                      className="w-full text-xs p-1 border border-gray-200 rounded"
-                      placeholder="Начало"
-                    />
-                    <input
-                      type="datetime-local"
-                      value={customEndDate}
-                      onChange={(e) => setCustomEndDate(e.target.value)}
-                      className="w-full text-xs p-1 border border-gray-200 rounded"
-                      placeholder="Конец"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Vehicle Selection for Path */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-gray-700">Транспорт</span>
-                  <CheckSquare className="w-3 h-3 text-gray-500" />
-                </div>
-                
-                <div className="max-h-32 overflow-y-auto space-y-1">
-                  {vehicles.slice(0, 5).map(vehicle => (
-                    <label key={vehicle.id} className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedVehiclesForPath.includes(vehicle.id)}
-                        onChange={(e) => {
-                          console.log('Vehicle selection changed:', vehicle.id, 'checked:', e.target.checked);
-                          if (e.target.checked) {
-                            const newSelection = [...selectedVehiclesForPath, vehicle.id];
-                            console.log('New selection:', newSelection);
-                            setSelectedVehiclesForPath(newSelection);
-                          } else {
-                            const newSelection = selectedVehiclesForPath.filter(id => id !== vehicle.id);
-                            console.log('New selection after removal:', newSelection);
-                            setSelectedVehiclesForPath(newSelection);
-                          }
-                        }}
-                        className="w-3 h-3 text-blue-600"
-                      />
-                      <span className="text-xs text-gray-700 truncate">
-                        {vehicle.name.split(' ').slice(0, 2).join(' ')}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Apply Button */}
-              <Button
-                size="sm"
-                className="w-full"
-                onClick={() => {
-                  console.log('Show paths button clicked');
-                  console.log('Selected vehicles:', selectedVehiclesForPath);
-                  console.log('Time range:', timeRange);
-                  console.log('onPathQueryChange exists:', !!onPathQueryChange);
-                  
-                  if (onPathQueryChange) {
-                    const startTime = timeRange === 'custom' && customStartDate 
-                      ? new Date(customStartDate)
-                      : timeRange === 'yesterday'
-                      ? new Date(Date.now() - 24 * 60 * 60 * 1000)
-                      : timeRange === 'week'
-                      ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-                      : new Date(new Date().setHours(0, 0, 0, 0));
-                      
-                    const endTime = timeRange === 'custom' && customEndDate
-                      ? new Date(customEndDate)
-                      : new Date();
-
-                    console.log('Calling onPathQueryChange with:', {
-                      vehicleIds: selectedVehiclesForPath,
-                      startTime,
-                      endTime,
-                      resolution: 'medium'
-                    });
-
-                    onPathQueryChange({
-                      vehicleIds: selectedVehiclesForPath,
-                      startTime,
-                      endTime,
-                      resolution: 'medium'
-                    });
-                  } else {
-                    console.error('onPathQueryChange is not provided');
-                  }
-                }}
-                disabled={selectedVehiclesForPath.length === 0}
-              >
-                <Play className="w-3 h-3 mr-1" />
-                Показать пути
-              </Button>
-            </div>
-          )}
 
           {/* Standard Calendar Display when not in path mode */}
           {!showPathControls && (

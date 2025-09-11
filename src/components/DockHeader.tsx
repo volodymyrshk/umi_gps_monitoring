@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Dock, DockIcon } from '@/components/magicui/dock';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 interface DockHeaderProps {
   onMenuClick?: () => void;
@@ -35,8 +36,14 @@ export default function DockHeader({ onMenuClick, showPaths, onTogglePaths }: Do
         <div className="flex items-center justify-between w-full">
           {/* Left Section - Logo and Search */}
           <div className="flex items-center space-x-4">
-            <div className="bg-primary text-primary-foreground px-3 py-1.5 rounded-xl text-sm font-bold">
-              UNI
+            <div className="w-10 h-10 rounded-xl overflow-hidden">
+              <Image
+                src="/logo.jpeg"
+                alt="UNI"
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+              />
             </div>
             
             {/* Search Bar */}
@@ -70,7 +77,7 @@ export default function DockHeader({ onMenuClick, showPaths, onTogglePaths }: Do
                           "h-8 px-3 rounded-xl transition-all duration-200",
                           activeMode === item.id 
                             ? 'bg-primary text-primary-foreground shadow-sm' 
-                            : 'hover:bg-background/50'
+                            : 'hover:bg-background/50 text-gray-700'
                         )}
                       >
                         <item.icon className="w-4 h-4 mr-2" />

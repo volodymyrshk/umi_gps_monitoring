@@ -1,4 +1,4 @@
-import { Search, User, Map, BarChart3, FileText, PieChart, Route, Truck, AlertTriangle } from 'lucide-react';
+import { Search, User, Map, BarChart3, FileText, PieChart, Route } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,10 +17,9 @@ interface DockHeaderProps {
   onMenuClick?: () => void;
   showPaths?: boolean;
   onTogglePaths?: (show: boolean) => void;
-  vehicles?: Array<{ status: { status: string } }>;
 }
 
-export default function DockHeader({ onMenuClick, showPaths, onTogglePaths, vehicles = [] }: DockHeaderProps) {
+export default function DockHeader({ onMenuClick, showPaths, onTogglePaths }: DockHeaderProps) {
   const [activeMode, setActiveMode] = useState('navigation');
 
   const navigationItems = [
@@ -56,36 +55,6 @@ export default function DockHeader({ onMenuClick, showPaths, onTogglePaths, vehi
                 className="pl-10 pr-4 py-2 bg-muted border-0 rounded-2xl text-sm placeholder:text-muted-foreground focus:bg-muted focus:ring-2 focus:ring-primary/20 w-64"
               />
             </div>
-
-            {/* Vehicle Summary Stats */}
-            {vehicles.length > 0 && (
-              <div className="flex items-center space-x-3 ml-4">
-                <div className="flex items-center space-x-2 px-3 py-1.5 bg-success/10 rounded-xl">
-                  <Truck className="w-4 h-4 text-success" />
-                  <span className="text-sm font-medium text-success">
-                    {vehicles.filter(v => v.status.status === 'online').length}
-                  </span>
-                  <span className="text-xs text-success/70">активно</span>
-                </div>
-                
-                <div className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 rounded-xl">
-                  <span className="text-sm font-medium text-gray-700">
-                    {vehicles.length}
-                  </span>
-                  <span className="text-xs text-gray-500">всего</span>
-                </div>
-
-                {vehicles.filter(v => v.status.status === 'warning' || v.status.status === 'offline').length > 0 && (
-                  <div className="flex items-center space-x-2 px-3 py-1.5 bg-destructive/10 rounded-xl">
-                    <AlertTriangle className="w-4 h-4 text-destructive" />
-                    <span className="text-sm font-medium text-destructive">
-                      {vehicles.filter(v => v.status.status === 'warning' || v.status.status === 'offline').length}
-                    </span>
-                    <span className="text-xs text-destructive/70">проблемы</span>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Center Section - Clean Navigation */}

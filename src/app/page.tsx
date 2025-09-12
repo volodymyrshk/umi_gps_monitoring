@@ -155,7 +155,6 @@ export default function Home() {
         onMenuClick={() => setSidebarOpen(true)}
         showPaths={showPaths}
         onTogglePaths={setShowPaths}
-        vehicles={vehicles}
       />
       
       {/* Sidebar */}

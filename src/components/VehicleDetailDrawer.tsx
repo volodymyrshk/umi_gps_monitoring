@@ -59,18 +59,30 @@ export default function VehicleDetailDrawer({
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed right-4 bottom-4 top-20 w-96 z-[1002] bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-gray-900/10 border border-white/20 flex flex-col overflow-hidden"
+          className={`fixed right-4 z-[1002] bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-gray-900/10 border border-white/20 flex flex-col overflow-hidden ${
+            isExpanded 
+              ? 'top-20 bottom-4 w-96' 
+              : 'top-20 w-80 h-auto'
+          }`}
         >
           {/* Drawer Header */}
           <div className="p-4 border-b border-gray-100/50">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <Gauge className="w-4 h-4 text-primary" />
+                <div className="w-8 h-8 rounded-lg overflow-hidden bg-white shadow-sm">
+                  <img
+                    src="/JohnDeere.jpeg"
+                    alt="John Deere"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).parentElement!.innerHTML = 
+                        '<div class="w-full h-full bg-green-500 flex items-center justify-center"><span class="text-white font-bold text-xs">JD</span></div>';
+                    }}
+                  />
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900">{vehicle.displayName}</h3>
-                  <p className="text-xs text-gray-500">ID: {vehicle.name}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-1">
@@ -93,46 +105,82 @@ export default function VehicleDetailDrawer({
               </div>
             </div>
 
-            {/* Tab Navigation */}
-            <div className="flex space-x-1 mt-3">
-              {tabs.map(tab => {
-                const IconComponent = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                      activeTab === tab.id 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <IconComponent className="w-3 h-3" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            {/* Tab Navigation - Only show when expanded */}
+            {isExpanded && (
+              <div className="flex space-x-1 mt-3">
+                {tabs.map(tab => {
+                  const IconComponent = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        activeTab === tab.id 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      <IconComponent className="w-3 h-3" />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Drawer Content */}
-          <div className="flex-1 overflow-y-auto">
-            <motion.div
-              animate={{ height: isExpanded ? 'auto' : '200px' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="overflow-hidden"
-            >
+          <div className={`${isExpanded ? 'flex-1 overflow-y-auto' : ''}`}>
+            {isExpanded ? (
               <div className="p-4">
                 {activeTab === 'overview' && <OverviewTab vehicle={vehicle} />}
                 {activeTab === 'telemetry' && <TelemetryTab vehicle={vehicle} />}
                 {activeTab === 'history' && <HistoryTab vehicle={vehicle} />}
                 {activeTab === 'analytics' && <AnalyticsTab vehicle={vehicle} />}
               </div>
-            </motion.div>
+            ) : (
+              <div className="p-4">
+                <CompactOverview vehicle={vehicle} />
+              </div>
+            )}
           </div>
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+function CompactOverview({ vehicle }: { vehicle: Vehicle }) {
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="flex items-center space-x-2">
+          <div className={`w-2 h-2 rounded-full ${
+            vehicle.status.status === 'online' ? 'bg-green-500' : 
+            vehicle.status.status === 'warning' ? 'bg-red-500' : 'bg-gray-400'
+          }`}></div>
+          <span className="text-gray-600">
+            {vehicle.status.status === 'online' ? 'Онлайн' : 
+             vehicle.status.status === 'warning' ? 'Проблема' : 'Офлайн'}
+          </span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Fuel className="w-3 h-3 text-green-500" />
+          <span className="font-medium">{vehicle.fuel || 75}%</span>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="flex items-center space-x-2">
+          <Gauge className="w-3 h-3 text-blue-500" />
+          <span>{vehicle.speed || 0} км/ч</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Clock className="w-3 h-3 text-orange-500" />
+          <span>{vehicle.roadTime || 0}ч</span>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -160,36 +208,6 @@ function OverviewTab({ vehicle }: { vehicle: Vehicle }) {
 
   return (
     <div className="space-y-4">
-      {/* Vehicle Header with JohnDeere Icon */}
-      <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-100">
-        <div className="w-12 h-12 rounded-lg overflow-hidden bg-white shadow-sm">
-          <img
-            src="/JohnDeere.jpeg"
-            alt="John Deere"
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              // Fallback to colored background if image doesn't exist
-              (e.target as HTMLImageElement).style.display = 'none';
-              (e.target as HTMLImageElement).parentElement!.innerHTML = 
-                '<div class="w-full h-full bg-green-500 flex items-center justify-center"><span class="text-white font-bold text-xs">JD</span></div>';
-            }}
-          />
-        </div>
-        <div className="flex-1">
-          <h3 className="font-semibold text-gray-900">{vehicle.displayName}</h3>
-          <p className="text-xs text-gray-500">ID: {vehicle.name} • John Deere</p>
-          <div className="flex items-center space-x-2 mt-1">
-            <div className={`w-2 h-2 rounded-full ${
-              vehicle.status.status === 'online' ? 'bg-green-500' : 
-              vehicle.status.status === 'warning' ? 'bg-red-500' : 'bg-gray-400'
-            }`}></div>
-            <span className="text-xs font-medium text-gray-600">
-              {vehicle.status.status === 'online' ? 'Онлайн' : 
-               vehicle.status.status === 'warning' ? 'Проблема' : 'Офлайн'}
-            </span>
-          </div>
-        </div>
-      </div>
 
       {/* Fuel Level Chart */}
       <Card className="border-0 shadow-none bg-transparent">

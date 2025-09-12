@@ -40,14 +40,14 @@ export default function VehicleDetailDrawer({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          exit={{ y: '100%' }}
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed bottom-0 left-0 right-0 z-[1002] bg-white border-t border-gray-200 shadow-xl"
+          className="fixed right-4 bottom-4 top-20 w-96 z-[1002] bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-gray-900/10 border border-white/20 flex flex-col overflow-hidden"
         >
           {/* Drawer Header */}
-          <div className="p-4 border-b border-gray-100">
+          <div className="p-4 border-b border-gray-100/50">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -58,22 +58,22 @@ export default function VehicleDetailDrawer({
                   <p className="text-xs text-gray-500">ID: {vehicle.name}</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="p-1"
+                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                  {isExpanded ? <ChevronDown className="w-4 h-4 text-gray-600" /> : <ChevronUp className="w-4 h-4 text-gray-600" />}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={onClose}
-                  className="p-1"
+                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 text-gray-600" />
                 </Button>
               </div>
             </div>
@@ -101,18 +101,20 @@ export default function VehicleDetailDrawer({
           </div>
 
           {/* Drawer Content */}
-          <motion.div
-            animate={{ height: isExpanded ? 'auto' : '200px' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="overflow-hidden"
-          >
-            <div className="p-4">
-              {activeTab === 'overview' && <OverviewTab vehicle={vehicle} />}
-              {activeTab === 'telemetry' && <TelemetryTab vehicle={vehicle} />}
-              {activeTab === 'history' && <HistoryTab vehicle={vehicle} />}
-              {activeTab === 'analytics' && <AnalyticsTab vehicle={vehicle} />}
-            </div>
-          </motion.div>
+          <div className="flex-1 overflow-y-auto">
+            <motion.div
+              animate={{ height: isExpanded ? 'auto' : '200px' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="overflow-hidden"
+            >
+              <div className="p-4">
+                {activeTab === 'overview' && <OverviewTab vehicle={vehicle} />}
+                {activeTab === 'telemetry' && <TelemetryTab vehicle={vehicle} />}
+                {activeTab === 'history' && <HistoryTab vehicle={vehicle} />}
+                {activeTab === 'analytics' && <AnalyticsTab vehicle={vehicle} />}
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
@@ -121,7 +123,7 @@ export default function VehicleDetailDrawer({
 
 function OverviewTab({ vehicle }: { vehicle: Vehicle }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 gap-3">
       <div className="bg-gray-50 rounded-lg p-3">
         <div className="flex items-center space-x-2 mb-2">
           <MapPin className="w-4 h-4 text-primary" />
@@ -162,7 +164,7 @@ function OverviewTab({ vehicle }: { vehicle: Vehicle }) {
 
 function TelemetryTab({ vehicle }: { vehicle: Vehicle }) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 gap-3">
       <div className="bg-gray-50 rounded-lg p-3 text-center">
         <Timer className="w-6 h-6 text-primary mx-auto mb-2" />
         <div className="text-lg font-bold text-gray-900">{vehicle.engineHours || 0}h</div>
@@ -231,7 +233,7 @@ function HistoryTab({ vehicle }: { vehicle: Vehicle }) {
 
 function AnalyticsTab({ vehicle }: { vehicle: Vehicle }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 gap-4">
       <div className="bg-gray-50 rounded-lg p-4">
         <h4 className="text-sm font-medium text-gray-700 mb-3">Сегодня</h4>
         <div className="space-y-2">

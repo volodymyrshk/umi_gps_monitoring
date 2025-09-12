@@ -7,9 +7,24 @@ import {
   ChevronUp, ChevronDown, X, 
   Gauge, Fuel, Timer, Clock, 
   MapPin, Thermometer, AlertTriangle,
-  Activity, BarChart3, History
+  Activity, BarChart3, History, TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 interface VehicleDetailDrawerProps {
   vehicle: Vehicle | null;
@@ -232,58 +247,141 @@ function HistoryTab({ vehicle }: { vehicle: Vehicle }) {
 }
 
 function AnalyticsTab({ vehicle }: { vehicle: Vehicle }) {
+  // Generate fuel level data for the last 24 hours
+  const fuelData = Array.from({ length: 24 }, (_, i) => {
+    const hour = new Date();
+    hour.setHours(i);
+    const baseLevel = vehicle.fuel || 75;
+    // Simulate fuel consumption throughout the day
+    const consumption = Math.max(0, baseLevel - (i * 2) + Math.random() * 10 - 5);
+    return {
+      time: hour.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+      hour: i.toString(),
+      fuel: Math.round(Math.min(100, Math.max(0, consumption))),
+    };
+  });
+
+  const chartConfig = {
+    fuel: {
+      label: "Fuel Level (%)",
+      color: "#22c55e", // Green color
+    },
+  } satisfies ChartConfig;
+
   return (
-    <div className="grid grid-cols-1 gap-4">
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-3">Сегодня</h4>
-        <div className="space-y-2">
-          <div className="flex justify-between text-xs">
-            <span className="text-gray-600">Пробег:</span>
-            <span className="font-medium">42 км</span>
+    <div className="space-y-4">
+      {/* Fuel Level Chart */}
+      <Card className="border-0 shadow-none bg-transparent">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-gray-900">Уровень топлива</CardTitle>
+          <CardDescription className="text-xs text-gray-500">
+            За последние 24 часа
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <ChartContainer config={chartConfig} className="h-[160px] w-full">
+            <AreaChart
+              accessibilityLayer
+              data={fuelData}
+              margin={{
+                left: 12,
+                right: 12,
+                top: 12,
+                bottom: 12,
+              }}
+            >
+              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis
+                dataKey="hour"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                interval={3}
+                tickFormatter={(value) => `${value}:00`}
+                fontSize={10}
+                fill="#6b7280"
+              />
+              <ChartTooltip 
+                cursor={false} 
+                content={<ChartTooltipContent 
+                  labelFormatter={(label) => `${label}:00`}
+                  formatter={(value) => [`${value}%`, 'Топливо']}
+                />} 
+              />
+              <defs>
+                <linearGradient id="fillFuel" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="#22c55e"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="#22c55e"
+                    stopOpacity={0.1}
+                  />
+                </linearGradient>
+              </defs>
+              <Area
+                dataKey="fuel"
+                type="natural"
+                fill="url(#fillFuel)"
+                fillOpacity={0.6}
+                stroke="#22c55e"
+                strokeWidth={2}
+              />
+            </AreaChart>
+          </ChartContainer>
+        </CardContent>
+        <CardFooter className="pt-2 pb-0">
+          <div className="flex w-full items-start gap-2 text-xs">
+            <div className="grid gap-1">
+              <div className="flex items-center gap-2 font-medium text-gray-700">
+                Текущий уровень: {vehicle.fuel || 75}% <Fuel className="h-3 w-3 text-green-500" />
+              </div>
+              <div className="text-gray-500 flex items-center gap-2">
+                {fuelData[fuelData.length - 1]?.fuel > fuelData[0]?.fuel ? 'Заправка' : 'Расход'} за день
+              </div>
+            </div>
           </div>
-          <div className="flex justify-between text-xs">
-            <span className="text-gray-600">Топливо:</span>
-            <span className="font-medium">12.5 л</span>
-          </div>
-          <div className="flex justify-between text-xs">
-            <span className="text-gray-600">Моточасы:</span>
-            <span className="font-medium">3.2 ч</span>
+        </CardFooter>
+      </Card>
+
+      {/* Stats Summary */}
+      <div className="grid grid-cols-1 gap-3">
+        <div className="bg-gray-50 rounded-lg p-3">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Сегодня</h4>
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Пробег:</span>
+              <span className="font-medium">42 км</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Топливо:</span>
+              <span className="font-medium">12.5 л</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Моточасы:</span>
+              <span className="font-medium">3.2 ч</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-3">На этой неделе</h4>
-        <div className="space-y-2">
-          <div className="flex justify-between text-xs">
-            <span className="text-gray-600">Пробег:</span>
-            <span className="font-medium">287 км</span>
-          </div>
-          <div className="flex justify-between text-xs">
-            <span className="text-gray-600">Топливо:</span>
-            <span className="font-medium">89.2 л</span>
-          </div>
-          <div className="flex justify-between text-xs">
-            <span className="text-gray-600">Моточасы:</span>
-            <span className="font-medium">22.1 ч</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-3">За месяц</h4>
-        <div className="space-y-2">
-          <div className="flex justify-between text-xs">
-            <span className="text-gray-600">Пробег:</span>
-            <span className="font-medium">1,243 км</span>
-          </div>
-          <div className="flex justify-between text-xs">
-            <span className="text-gray-600">Топливо:</span>
-            <span className="font-medium">378.5 л</span>
-          </div>
-          <div className="flex justify-between text-xs">
-            <span className="text-gray-600">Моточасы:</span>
-            <span className="font-medium">95.7 ч</span>
+        <div className="bg-gray-50 rounded-lg p-3">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">На этой неделе</h4>
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Пробег:</span>
+              <span className="font-medium">287 км</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Топливо:</span>
+              <span className="font-medium">89.2 л</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Моточасы:</span>
+              <span className="font-medium">22.1 ч</span>
+            </div>
           </div>
         </div>
       </div>

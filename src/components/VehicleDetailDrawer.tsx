@@ -137,41 +137,167 @@ export default function VehicleDetailDrawer({
 }
 
 function OverviewTab({ vehicle }: { vehicle: Vehicle }) {
+  // Generate fuel level data for the last 24 hours
+  const fuelData = Array.from({ length: 24 }, (_, i) => {
+    const hour = new Date();
+    hour.setHours(i);
+    const baseLevel = vehicle.fuel || 75;
+    // Simulate fuel consumption throughout the day
+    const consumption = Math.max(0, baseLevel - (i * 2) + Math.random() * 10 - 5);
+    return {
+      time: hour.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+      hour: i.toString(),
+      fuel: Math.round(Math.min(100, Math.max(0, consumption))),
+    };
+  });
+
+  const chartConfig = {
+    fuel: {
+      label: "Fuel Level (%)",
+      color: "#22c55e", // Green color
+    },
+  } satisfies ChartConfig;
+
   return (
-    <div className="grid grid-cols-1 gap-3">
-      <div className="bg-gray-50 rounded-lg p-3">
-        <div className="flex items-center space-x-2 mb-2">
-          <MapPin className="w-4 h-4 text-primary" />
-          <span className="text-sm font-medium text-gray-700">Локация</span>
+    <div className="space-y-4">
+      {/* Vehicle Header with JohnDeere Icon */}
+      <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-100">
+        <div className="w-12 h-12 rounded-lg overflow-hidden bg-white shadow-sm">
+          <img
+            src="/JohnDeere.jpeg"
+            alt="John Deere"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to colored background if image doesn't exist
+              (e.target as HTMLImageElement).style.display = 'none';
+              (e.target as HTMLImageElement).parentElement!.innerHTML = 
+                '<div class="w-full h-full bg-green-500 flex items-center justify-center"><span class="text-white font-bold text-xs">JD</span></div>';
+            }}
+          />
         </div>
-        <p className="text-xs text-gray-600">{vehicle.currentLocation.address || 'Неизвестно'}</p>
-        <p className="text-xs text-gray-500 mt-1">
-          {vehicle.currentLocation.lat?.toFixed(6) || 'N/A'}, {vehicle.currentLocation.lng?.toFixed(6) || 'N/A'}
-        </p>
+        <div className="flex-1">
+          <h3 className="font-semibold text-gray-900">{vehicle.displayName}</h3>
+          <p className="text-xs text-gray-500">ID: {vehicle.name} • John Deere</p>
+          <div className="flex items-center space-x-2 mt-1">
+            <div className={`w-2 h-2 rounded-full ${
+              vehicle.status.status === 'online' ? 'bg-green-500' : 
+              vehicle.status.status === 'warning' ? 'bg-red-500' : 'bg-gray-400'
+            }`}></div>
+            <span className="text-xs font-medium text-gray-600">
+              {vehicle.status.status === 'online' ? 'Онлайн' : 
+               vehicle.status.status === 'warning' ? 'Проблема' : 'Офлайн'}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-gray-50 rounded-lg p-3">
-        <div className="flex items-center space-x-2 mb-2">
-          <Fuel className="w-4 h-4 text-blue-500" />
-          <span className="text-sm font-medium text-gray-700">Топливо</span>
-        </div>
-        <p className="text-lg font-bold text-gray-900">{vehicle.fuel || 0}%</p>
-      </div>
+      {/* Fuel Level Chart */}
+      <Card className="border-0 shadow-none bg-transparent">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-gray-900 flex items-center gap-2">
+            <Fuel className="w-4 h-4 text-green-500" />
+            Уровень топлива
+          </CardTitle>
+          <CardDescription className="text-xs text-gray-500">
+            За последние 24 часа • Текущий уровень: {vehicle.fuel || 75}%
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <ChartContainer config={chartConfig} className="h-[120px] w-full">
+            <AreaChart
+              accessibilityLayer
+              data={fuelData}
+              margin={{
+                left: 12,
+                right: 12,
+                top: 12,
+                bottom: 12,
+              }}
+            >
+              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis
+                dataKey="hour"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                interval={5}
+                tickFormatter={(value) => `${value}:00`}
+                fontSize={10}
+                fill="#6b7280"
+              />
+              <ChartTooltip 
+                cursor={{ stroke: 'transparent' }}
+                content={<ChartTooltipContent 
+                  labelFormatter={(label) => `${label}:00`}
+                  formatter={(value) => [`${value}%`, 'Топливо']}
+                />} 
+              />
+              <defs>
+                <linearGradient id="fillFuelOverview" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="#22c55e"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="#22c55e"
+                    stopOpacity={0.1}
+                  />
+                </linearGradient>
+              </defs>
+              <Area
+                dataKey="fuel"
+                type="natural"
+                fill="url(#fillFuelOverview)"
+                fillOpacity={0.6}
+                stroke="#22c55e"
+                strokeWidth={2}
+              />
+            </AreaChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
 
-      <div className="bg-gray-50 rounded-lg p-3">
-        <div className="flex items-center space-x-2 mb-2">
-          <Gauge className="w-4 h-4 text-green-500" />
-          <span className="text-sm font-medium text-gray-700">Скорость</span>
+      {/* Key Metrics Grid */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-gray-50 rounded-lg p-3">
+          <div className="flex items-center space-x-2 mb-2">
+            <MapPin className="w-4 h-4 text-primary" />
+            <span className="text-xs font-medium text-gray-700">Локация</span>
+          </div>
+          <p className="text-xs text-gray-600 font-medium">{vehicle.currentLocation.address?.split(',')[0] || 'Неизвестно'}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            {vehicle.currentLocation.lat?.toFixed(4) || 'N/A'}, {vehicle.currentLocation.lng?.toFixed(4) || 'N/A'}
+          </p>
         </div>
-        <p className="text-lg font-bold text-gray-900">{vehicle.speed || 0} км/ч</p>
-      </div>
 
-      <div className="bg-gray-50 rounded-lg p-3">
-        <div className="flex items-center space-x-2 mb-2">
-          <Clock className="w-4 h-4 text-orange-500" />
-          <span className="text-sm font-medium text-gray-700">В дороге</span>
+        <div className="bg-gray-50 rounded-lg p-3">
+          <div className="flex items-center space-x-2 mb-2">
+            <Gauge className="w-4 h-4 text-blue-500" />
+            <span className="text-xs font-medium text-gray-700">Скорость</span>
+          </div>
+          <p className="text-lg font-bold text-gray-900">{vehicle.speed || 0}</p>
+          <p className="text-xs text-gray-500">км/ч</p>
         </div>
-        <p className="text-lg font-bold text-gray-900">{vehicle.roadTime || 0}ч</p>
+
+        <div className="bg-gray-50 rounded-lg p-3">
+          <div className="flex items-center space-x-2 mb-2">
+            <Timer className="w-4 h-4 text-purple-500" />
+            <span className="text-xs font-medium text-gray-700">Моточасы</span>
+          </div>
+          <p className="text-lg font-bold text-gray-900">{vehicle.engineHours || 0}</p>
+          <p className="text-xs text-gray-500">часов</p>
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-3">
+          <div className="flex items-center space-x-2 mb-2">
+            <Clock className="w-4 h-4 text-orange-500" />
+            <span className="text-xs font-medium text-gray-700">В дороге</span>
+          </div>
+          <p className="text-lg font-bold text-gray-900">{vehicle.roadTime || 0}</p>
+          <p className="text-xs text-gray-500">часов</p>
+        </div>
       </div>
     </div>
   );
@@ -302,7 +428,7 @@ function AnalyticsTab({ vehicle }: { vehicle: Vehicle }) {
                 fill="#6b7280"
               />
               <ChartTooltip 
-                cursor={false} 
+                cursor={{ stroke: 'transparent' }}
                 content={<ChartTooltipContent 
                   labelFormatter={(label) => `${label}:00`}
                   formatter={(value) => [`${value}%`, 'Топливо']}

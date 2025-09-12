@@ -48,7 +48,10 @@ export default function ComprehensiveSidebar({
 }: ComprehensiveSidebarProps) {
   const [folderExpanded, setFolderExpanded] = useState(true);
   const [secondFolderExpanded, setSecondFolderExpanded] = useState(false);
+  const [problemsFolderExpanded, setProblemsFolderExpanded] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState('today');
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const vehicleListRef = useRef<HTMLDivElement>(null);
   
@@ -183,6 +186,31 @@ export default function ComprehensiveSidebar({
     return vehicles;
   };
 
+  const getPeriodDisplay = () => {
+    const today = new Date();
+    switch (selectedPeriod) {
+      case 'today':
+        return `Сегодня - ${today.toLocaleDateString('ru-RU')}`;
+      case 'yesterday': {
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        return `Вчера - ${yesterday.toLocaleDateString('ru-RU')}`;
+      }
+      case 'week': {
+        const weekAgo = new Date(today);
+        weekAgo.setDate(today.getDate() - 7);
+        return `${weekAgo.toLocaleDateString('ru-RU')} - ${today.toLocaleDateString('ru-RU')}`;
+      }
+      case 'month': {
+        const monthAgo = new Date(today);
+        monthAgo.setMonth(today.getMonth() - 1);
+        return `${monthAgo.toLocaleDateString('ru-RU')} - ${today.toLocaleDateString('ru-RU')}`;
+      }
+      default:
+        return `Сегодня - ${today.toLocaleDateString('ru-RU')}`;
+    }
+  };
+
   return (
     <div className={`fixed top-20 left-4 bottom-4 w-96 z-[1001] ${
       isOpen ? 'block' : 'hidden'
@@ -266,7 +294,14 @@ export default function ComprehensiveSidebar({
                 <Folder className="w-4 h-4 text-gray-600 flex-shrink-0" />
               )}
               <span className="text-sm font-medium text-gray-900 flex-1">Тарировка Август 2024</span>
-              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{vehicles.length}</span>
+              <div className="flex items-center space-x-1">
+                <span className="text-xs text-success bg-success/10 px-1.5 py-0.5 rounded-full">
+                  {vehicles.filter(v => v.status.status === 'online').length}
+                </span>
+                <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                  {vehicles.length}
+                </span>
+              </div>
             </button>
             
             {/* Vehicle List for First Folder */}
@@ -294,7 +329,7 @@ export default function ComprehensiveSidebar({
             )}
           </div>
 
-          {/* Second Folder: Historical Data */}
+          {/* Second Folder: By Vehicle Type */}
           <div className="mb-2">
             <button 
               onClick={() => setSecondFolderExpanded(!secondFolderExpanded)}
@@ -305,42 +340,114 @@ export default function ComprehensiveSidebar({
               ) : (
                 <Folder className="w-4 h-4 text-gray-600 flex-shrink-0" />
               )}
-              <span className="text-sm font-medium text-gray-900 flex-1">Архивные данные</span>
-              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">2</span>
+              <span className="text-sm font-medium text-gray-900 flex-1">За типом техники</span>
+              <div className="flex items-center space-x-1">
+                <span className="text-xs text-info bg-info/10 px-1.5 py-0.5 rounded-full">
+                  {Object.keys(vehicles.reduce((acc, v) => ({ ...acc, [v.type]: true }), {})).length}
+                </span>
+              </div>
             </button>
             
-            {/* Archive List for Second Folder */}
+            {/* Vehicle Type Groups */}
             {secondFolderExpanded && (
               <div className="ml-4 relative">
                 {/* Tree line */}
                 <div className="absolute left-2 top-0 bottom-0 w-px bg-gray-200"></div>
                 
                 <div className="space-y-1 pt-2">
-                  <div className="relative">
-                    <div className="absolute left-2 top-4 w-3 h-px bg-gray-200"></div>
-                    <div className="ml-6 pl-2 flex items-center space-x-2 py-2 hover:bg-gray-50 rounded-md cursor-pointer">
-                      <Folder className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">Тарировка Июль 2024</span>
+                  {Object.entries(
+                    vehicles.reduce((acc: Record<string, Vehicle[]>, vehicle) => {
+                      const type = vehicle.type;
+                      if (!acc[type]) acc[type] = [];
+                      acc[type].push(vehicle);
+                      return acc;
+                    }, {})
+                  ).map(([type, typeVehicles]) => (
+                    <div key={type} className="relative">
+                      <div className="absolute left-2 top-4 w-3 h-px bg-gray-200"></div>
+                      <div className="ml-6 pl-2 flex items-center justify-between py-2 hover:bg-gray-50 rounded-md cursor-pointer">
+                        <div className="flex items-center space-x-2">
+                          <Truck className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                          <span className="text-sm text-gray-700 capitalize">{type || 'Неизвестный'}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <span className="text-xs text-success bg-success/10 px-1.5 py-0.5 rounded-full">
+                            {typeVehicles.filter(v => v.status.status === 'online').length}
+                          </span>
+                          <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                            {typeVehicles.length}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="relative">
-                    <div className="absolute left-2 top-4 w-3 h-px bg-gray-200"></div>
-                    <div className="ml-6 pl-2 flex items-center space-x-2 py-2 hover:bg-gray-50 rounded-md cursor-pointer">
-                      <Folder className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">Тарировка Июнь 2024</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Additional Folders to match reference */}
+          {/* Third Folder: Problematic Vehicles */}
           <div className="mb-2">
-            <button className="w-full text-left flex items-center space-x-2 py-2 px-2 hover:bg-gray-50 rounded-md transition-colors group">
-              <Folder className="w-4 h-4 text-gray-600 flex-shrink-0" />
-              <span className="text-sm font-medium text-gray-900 flex-1">Данные телеметрии</span>
+            <button 
+              onClick={() => setProblemsFolderExpanded(!problemsFolderExpanded)}
+              className="w-full text-left flex items-center space-x-2 py-2 px-2 hover:bg-gray-50 rounded-md transition-colors group"
+            >
+              {problemsFolderExpanded ? (
+                <FolderOpen className="w-4 h-4 text-destructive flex-shrink-0" />
+              ) : (
+                <Folder className="w-4 h-4 text-destructive flex-shrink-0" />
+              )}
+              <span className="text-sm font-medium text-gray-900 flex-1">Проблемы</span>
+              <div className="flex items-center space-x-1">
+                {vehicles.filter(v => v.status.status === 'warning' || v.status.status === 'offline' || (v.fuel && v.fuel < 20)).length > 0 && (
+                  <span className="text-xs text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full animate-pulse">
+                    {vehicles.filter(v => v.status.status === 'warning' || v.status.status === 'offline' || (v.fuel && v.fuel < 20)).length}
+                  </span>
+                )}
+              </div>
             </button>
+            
+            {/* Problems List */}
+            {problemsFolderExpanded && (
+              <div className="ml-4 relative">
+                {/* Tree line */}
+                <div className="absolute left-2 top-0 bottom-0 w-px bg-gray-200"></div>
+                
+                <div className="space-y-1 pt-2">
+                  {/* Offline Vehicles */}
+                  {vehicles.filter(v => v.status.status === 'offline').length > 0 && (
+                    <div className="relative">
+                      <div className="absolute left-2 top-4 w-3 h-px bg-gray-200"></div>
+                      <div className="ml-6 pl-2 flex items-center justify-between py-2 hover:bg-gray-50 rounded-md cursor-pointer">
+                        <div className="flex items-center space-x-2">
+                          <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0" />
+                          <span className="text-sm text-gray-700">Недоступні</span>
+                        </div>
+                        <span className="text-xs text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full">
+                          {vehicles.filter(v => v.status.status === 'offline').length}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Low Fuel Vehicles */}
+                  {vehicles.filter(v => v.fuel && v.fuel < 20).length > 0 && (
+                    <div className="relative">
+                      <div className="absolute left-2 top-4 w-3 h-px bg-gray-200"></div>
+                      <div className="ml-6 pl-2 flex items-center justify-between py-2 hover:bg-gray-50 rounded-md cursor-pointer">
+                        <div className="flex items-center space-x-2">
+                          <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0" />
+                          <span className="text-sm text-gray-700">Низький рівень палива</span>
+                        </div>
+                        <span className="text-xs text-warning bg-warning/10 px-1.5 py-0.5 rounded-full">
+                          {vehicles.filter(v => v.fuel && v.fuel < 20).length}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="mb-2">
@@ -355,16 +462,51 @@ export default function ComprehensiveSidebar({
         <div className="p-4 border-t border-gray-100/50 space-y-3">
           
 
-          {/* Standard Calendar Display when not in path mode */}
+          {/* Enhanced Calendar Display when not in path mode */}
           {!showPathControls && (
-            <div className="bg-gray-50 rounded-xl p-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-gray-700">Период</span>
-                <Calendar className="w-3 h-3 text-gray-500" />
-              </div>
-              <div className="text-xs font-medium text-gray-600">
-                Сегодня - {new Date().toLocaleDateString('ru-RU')}
-              </div>
+            <div className="bg-gray-50 rounded-xl p-3 relative">
+              <button 
+                onClick={() => setShowDatePicker(!showDatePicker)}
+                className="w-full text-left hover:bg-gray-100 rounded-lg p-1 -m-1 transition-colors"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-gray-700">Период</span>
+                  <Calendar className="w-3 h-3 text-gray-500" />
+                </div>
+                <div className="text-xs font-medium text-gray-600">
+                  {getPeriodDisplay()}
+                </div>
+              </button>
+              
+              {/* Date Period Dropdown */}
+              {showDatePicker && (
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                  <div className="p-2">
+                    <div className="text-xs font-medium text-gray-700 mb-2 px-2">Выберите период:</div>
+                    <div className="space-y-1">
+                      {[
+                        { id: 'today', label: 'Сегодня' },
+                        { id: 'yesterday', label: 'Вчера' },
+                        { id: 'week', label: 'Последняя неделя' },
+                        { id: 'month', label: 'Последний месяц' },
+                      ].map(period => (
+                        <button
+                          key={period.id}
+                          onClick={() => {
+                            setSelectedPeriod(period.id);
+                            setShowDatePicker(false);
+                          }}
+                          className={`w-full text-left px-2 py-1.5 text-xs rounded hover:bg-gray-100 transition-colors ${
+                            selectedPeriod === period.id ? 'bg-primary/10 text-primary font-medium' : 'text-gray-600'
+                          }`}
+                        >
+                          {period.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           

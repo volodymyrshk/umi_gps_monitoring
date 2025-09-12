@@ -36,7 +36,7 @@ export default function DockHeader({ onMenuClick, showPaths, onTogglePaths }: Do
         <div className="flex items-center justify-between w-full">
           {/* Left Section - Logo and Search */}
           <div className="flex items-center space-x-4">
-            <div className="h-10 rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
+            <div className="h-10 rounded-xl overflow-hidden">
               <Image
                 src="/cube.jpg"
                 alt="Logo"

@@ -8,6 +8,9 @@ import { Location, StatusInfo } from '../entities/base';
 import { TelemetryRecord, RealtimeMetrics } from '../telemetry/types';
 
 export class VehicleDataGenerator {
+  // Store consistent fuel levels for each vehicle
+  private static readonly vehicleFuelLevels: Map<string, number> = new Map();
+
   private static readonly UKRAINIAN_CITIES = [
     { name: 'Київ', lat: 50.4501, lng: 30.5234, region: 'Київська область' },
     { name: 'Львів', lat: 49.8437, lng: 24.0262, region: 'Львівська область' },
@@ -167,13 +170,20 @@ export class VehicleDataGenerator {
     const isOnline = Math.random() > 0.2; // 80% online rate
     const isWorking = isOnline && Math.random() > 0.4; // 60% working when online
     
+    // Get or generate consistent fuel level for this vehicle
+    let fuelLevel = this.vehicleFuelLevels.get(vehicleId);
+    if (fuelLevel === undefined) {
+      fuelLevel = this.getRandomBetween(15, 95);
+      this.vehicleFuelLevels.set(vehicleId, fuelLevel);
+    }
+    
     return {
       vehicleId,
       timestamp: new Date(),
       isOnline,
       currentSpeed: isOnline ? (isWorking ? this.getRandomBetween(8, 25) : this.getRandomBetween(0, 5)) : 0,
       currentLocation: this.generateRandomLocation(),
-      fuelLevel: this.getRandomBetween(15, 95),
+      fuelLevel,
       engineRpm: isOnline ? (isWorking ? this.getRandomBetween(1500, 2200) : this.getRandomBetween(0, 800)) : 0,
       batteryLevel: this.getRandomBetween(70, 100),
       activeAlerts: Math.random() > 0.8 ? this.getRandomBetween(1, 3) : 0,
@@ -184,6 +194,16 @@ export class VehicleDataGenerator {
         comparison: this.getRandomBetween(-10, 15)
       }
     };
+  }
+
+  // Get consistent fuel level for a vehicle
+  static getVehicleFuelLevel(vehicleId: string): number {
+    let fuelLevel = this.vehicleFuelLevels.get(vehicleId);
+    if (fuelLevel === undefined) {
+      fuelLevel = this.getRandomBetween(15, 95);
+      this.vehicleFuelLevels.set(vehicleId, fuelLevel);
+    }
+    return fuelLevel;
   }
 
   // Helper methods

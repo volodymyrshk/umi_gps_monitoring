@@ -21,6 +21,10 @@ export default function Home() {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mapInstance, setMapInstance] = useState<any>(null);
+
+  const handleMapReady = (map: any) => {
+    setMapInstance(map);
+  };
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
   
   // Path tracking state
@@ -147,6 +151,7 @@ export default function Home() {
           onVehicleSelect={handleVehicleSelect}
           showPaths={showPaths}
           pathSegments={showPaths ? [...pathSegments, ...dplPaths] : []}
+          onMapReady={handleMapReady}
         />
       </div>
       

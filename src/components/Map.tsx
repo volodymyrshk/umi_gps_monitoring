@@ -14,14 +14,23 @@ interface MapProps {
   onVehicleSelect: (vehicle: Vehicle | any) => void;
   showPaths?: boolean;
   pathSegments?: any[];
+  onMapReady?: (map: L.Map) => void;
 }
 
-function MapUpdater({ selectedVehicle, pathSegments, showPaths }: { 
+function MapUpdater({ selectedVehicle, pathSegments, showPaths, onMapReady }: { 
   selectedVehicle: any; 
   pathSegments?: any[];
   showPaths?: boolean;
+  onMapReady?: (map: L.Map) => void;
 }) {
   const map = useMap();
+
+  // Call onMapReady callback when map is available
+  useEffect(() => {
+    if (map && onMapReady) {
+      onMapReady(map);
+    }
+  }, [map, onMapReady]);
 
   useEffect(() => {
     if (selectedVehicle) {
@@ -72,7 +81,7 @@ function MapUpdater({ selectedVehicle, pathSegments, showPaths }: {
   return null;
 }
 
-export default function Map({ vehicles, selectedVehicle, onVehicleSelect, showPaths, pathSegments }: MapProps) {
+export default function Map({ vehicles, selectedVehicle, onVehicleSelect, showPaths, pathSegments, onMapReady }: MapProps) {
   const mapRef = useRef<L.Map>(null);
   const [openPopupVehicleId, setOpenPopupVehicleId] = useState<string | null>(null);
 
@@ -122,6 +131,7 @@ export default function Map({ vehicles, selectedVehicle, onVehicleSelect, showPa
           selectedVehicle={selectedVehicle} 
           pathSegments={pathSegments}
           showPaths={showPaths}
+          onMapReady={onMapReady}
         />
         
         {vehicles.map((vehicle) => (

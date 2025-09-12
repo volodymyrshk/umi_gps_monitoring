@@ -1,4 +1,5 @@
 import { Vehicle } from '@/lib/entities/vehicle';
+import { VehicleDataGenerator } from '@/lib/generators/vehicle-generator';
 import { 
   MapPin, Battery, Clock, Fuel, ChevronDown, Zap, 
   Gauge, Thermometer, Timer, CreditCard, User, Navigation,
@@ -23,6 +24,12 @@ export default function ExpandableVehicleCard({ vehicle, isSelected, onClick }: 
   const getBatteryColor = (battery: number) => {
     if (battery > 50) return 'bg-green-500';
     if (battery > 20) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+
+  const getFuelColor = (fuel: number) => {
+    if (fuel > 50) return 'bg-green-500';
+    if (fuel > 20) return 'bg-yellow-500';
     return 'bg-red-500';
   };
 
@@ -98,12 +105,17 @@ export default function ExpandableVehicleCard({ vehicle, isSelected, onClick }: 
               <Badge variant="secondary" className={getStatusColor(vehicle.status?.status || vehicle.status)}>
                 {getStatusText(vehicle.status?.status || vehicle.status)}
               </Badge>
-              <div className={`w-6 h-3 rounded ${getBatteryColor(vehicle.battery)}`}>
-                <div 
-                  className="h-full bg-white/30 rounded" 
-                  style={{ width: `${vehicle.battery}%` }}
-                />
-              </div>
+              {(() => {
+                const fuelLevel = VehicleDataGenerator.getVehicleFuelLevel(vehicle.id);
+                return (
+                  <div className={`w-6 h-3 rounded ${getFuelColor(fuelLevel)}`}>
+                    <div 
+                      className="h-full bg-white/30 rounded" 
+                      style={{ width: `${fuelLevel}%` }}
+                    />
+                  </div>
+                );
+              })()}
               <motion.div
                 animate={{ rotate: isExpanded ? 180 : 0 }}
                 transition={{ duration: 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -208,7 +220,7 @@ export default function ExpandableVehicleCard({ vehicle, isSelected, onClick }: 
                     <div className="flex items-center justify-center mb-1">
                       <Fuel className="w-3 h-3 text-blue-500" />
                     </div>
-                    <div className="text-xs font-bold">{vehicle.fuel || 0}%</div>
+                    <div className="text-xs font-bold">{VehicleDataGenerator.getVehicleFuelLevel(vehicle.id)}%</div>
                     <div className="text-xs text-muted-foreground">Топливо</div>
                   </div>
                   <div className="text-center">

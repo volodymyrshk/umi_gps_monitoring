@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Vehicle } from '@/lib/entities/vehicle';
+import { VehicleDataGenerator } from '@/lib/generators/vehicle-generator';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronUp, ChevronDown, X, 
@@ -166,7 +167,7 @@ function CompactOverview({ vehicle }: { vehicle: Vehicle }) {
         </div>
         <div className="flex items-center space-x-2">
           <Fuel className="w-3 h-3 text-green-500" />
-          <span className="font-medium">{vehicle.fuel || 75}%</span>
+          <span className="font-medium">{VehicleDataGenerator.getVehicleFuelLevel(vehicle.id)}%</span>
         </div>
       </div>
       
@@ -185,13 +186,13 @@ function CompactOverview({ vehicle }: { vehicle: Vehicle }) {
 }
 
 function OverviewTab({ vehicle }: { vehicle: Vehicle }) {
-  // Generate fuel level data for the last 24 hours
+  // Generate fuel level data for the last 24 hours using consistent data
+  const consistentFuelLevel = VehicleDataGenerator.getVehicleFuelLevel(vehicle.id);
   const fuelData = Array.from({ length: 24 }, (_, i) => {
     const hour = new Date();
     hour.setHours(i);
-    const baseLevel = vehicle.fuel || 75;
-    // Simulate fuel consumption throughout the day
-    const consumption = Math.max(0, baseLevel - (i * 2) + Math.random() * 10 - 5);
+    // Simulate fuel consumption throughout the day based on consistent base level
+    const consumption = Math.max(0, consistentFuelLevel - (i * 2) + Math.random() * 10 - 5);
     return {
       time: hour.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
       hour: i.toString(),
@@ -217,7 +218,7 @@ function OverviewTab({ vehicle }: { vehicle: Vehicle }) {
             Уровень топлива
           </CardTitle>
           <CardDescription className="text-xs text-gray-500">
-            За последние 24 часа • Текущий уровень: {vehicle.fuel || 75}%
+            За последние 24 часа • Текущий уровень: {consistentFuelLevel}%
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
@@ -344,7 +345,7 @@ function TelemetryTab({ vehicle }: { vehicle: Vehicle }) {
       
       <div className="bg-gray-50 rounded-lg p-3 text-center">
         <Fuel className="w-6 h-6 text-green-500 mx-auto mb-2" />
-        <div className="text-lg font-bold text-gray-900">{vehicle.fuel || 0}%</div>
+        <div className="text-lg font-bold text-gray-900">{VehicleDataGenerator.getVehicleFuelLevel(vehicle.id)}%</div>
         <div className="text-xs text-gray-500">Топливо</div>
       </div>
 
@@ -391,13 +392,13 @@ function HistoryTab({ vehicle }: { vehicle: Vehicle }) {
 }
 
 function AnalyticsTab({ vehicle }: { vehicle: Vehicle }) {
-  // Generate fuel level data for the last 24 hours
+  // Generate fuel level data for the last 24 hours using consistent data
+  const consistentFuelLevel = VehicleDataGenerator.getVehicleFuelLevel(vehicle.id);
   const fuelData = Array.from({ length: 24 }, (_, i) => {
     const hour = new Date();
     hour.setHours(i);
-    const baseLevel = vehicle.fuel || 75;
-    // Simulate fuel consumption throughout the day
-    const consumption = Math.max(0, baseLevel - (i * 2) + Math.random() * 10 - 5);
+    // Simulate fuel consumption throughout the day based on consistent base level
+    const consumption = Math.max(0, consistentFuelLevel - (i * 2) + Math.random() * 10 - 5);
     return {
       time: hour.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
       hour: i.toString(),
@@ -481,7 +482,7 @@ function AnalyticsTab({ vehicle }: { vehicle: Vehicle }) {
           <div className="flex w-full items-start gap-2 text-xs">
             <div className="grid gap-1">
               <div className="flex items-center gap-2 font-medium text-gray-700">
-                Текущий уровень: {vehicle.fuel || 75}% <Fuel className="h-3 w-3 text-green-500" />
+                Текущий уровень: {consistentFuelLevel}% <Fuel className="h-3 w-3 text-green-500" />
               </div>
               <div className="text-gray-500 flex items-center gap-2">
                 {fuelData[fuelData.length - 1]?.fuel > fuelData[0]?.fuel ? 'Заправка' : 'Расход'} за день

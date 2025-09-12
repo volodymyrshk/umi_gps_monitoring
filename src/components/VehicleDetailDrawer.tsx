@@ -129,7 +129,7 @@ function OverviewTab({ vehicle }: { vehicle: Vehicle }) {
         </div>
         <p className="text-xs text-gray-600">{vehicle.currentLocation.address || 'Неизвестно'}</p>
         <p className="text-xs text-gray-500 mt-1">
-          {vehicle.currentLocation.lat.toFixed(6)}, {vehicle.currentLocation.lng.toFixed(6)}
+          {vehicle.currentLocation.lat?.toFixed(6) || 'N/A'}, {vehicle.currentLocation.lng?.toFixed(6) || 'N/A'}
         </p>
       </div>
 

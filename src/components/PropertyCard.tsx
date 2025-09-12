@@ -11,7 +11,7 @@ export default function PropertyCard({ property, isSelected, onClick }: Property
   return (
     <div 
       className={`bg-white rounded-lg border p-4 cursor-pointer transition-all hover:shadow-md ${
-        isSelected ? 'border-orange-500 shadow-md' : 'border-gray-200'
+        isSelected ? 'border-primary shadow-md' : 'border-gray-200'
       }`}
       onClick={() => onClick(property)}
     >

@@ -96,7 +96,7 @@ export default function Sidebar({ properties, selectedProperty, onPropertySelect
         <div className="flex items-center space-x-2 text-sm text-gray-600">
           <Calendar className="w-4 h-4" />
           <span>Торгова: Август 2024</span>
-          <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">3</span>
+          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">3</span>
         </div>
 
         <div className="mt-3 text-sm text-gray-600">

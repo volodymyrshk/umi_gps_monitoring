@@ -41,7 +41,7 @@ export default function VehicleDataTable({
 
   const getFuelColor = (fuel: number) => {
     if (fuel > 50) return 'text-blue-600';
-    if (fuel > 20) return 'text-orange-600';
+    if (fuel > 20) return 'text-blue-600';
     return 'text-red-600';
   };
 
@@ -178,7 +178,7 @@ export default function VehicleDataTable({
                 {/* Engine Hours */}
                 <td className="px-4 py-3">
                   <div className="flex items-center text-xs">
-                    <Timer className="w-3 h-3 mr-1 text-orange-500" />
+                    <Timer className="w-3 h-3 mr-1 text-blue-500" />
                     <span className="font-medium">{vehicle.engineHours || 0}h</span>
                   </div>
                 </td>

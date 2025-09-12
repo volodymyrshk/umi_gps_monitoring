@@ -16,7 +16,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </button>
         
         <div className="flex items-center space-x-3">
-          <div className="bg-orange-500 text-white px-2 py-1 rounded text-sm font-bold">
+          <div className="bg-primary text-primary-foreground px-2 py-1 rounded text-sm font-bold">
             UNI
           </div>
           <span className="text-gray-600 text-sm hidden sm:inline">Пошук</span>
@@ -27,13 +27,13 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <input
             type="text"
             placeholder="Пошук"
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent w-48 lg:w-64"
+            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-48 lg:w-64"
           />
         </div>
       </div>
 
       <div className="flex items-center space-x-2 sm:space-x-4">
-        <button className="bg-orange-500 text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors">
+        <button className="bg-primary text-primary-foreground px-3 sm:px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
           <span className="hidden sm:inline">Оголошення</span>
           <span className="sm:hidden">+</span>
         </button>

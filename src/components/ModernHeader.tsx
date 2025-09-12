@@ -16,7 +16,7 @@ export default function ModernHeader({ onMenuClick }: ModernHeaderProps) {
         <div className="flex items-center justify-between w-full">
           {/* Left Section - Logo and Search */}
           <div className="flex items-center space-x-4">
-            <div className="bg-orange-500 text-white px-3 py-1.5 rounded-xl text-sm font-bold">
+            <div className="bg-primary text-primary-foreground px-3 py-1.5 rounded-xl text-sm font-bold">
               UNI
             </div>
             

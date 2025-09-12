@@ -20,7 +20,7 @@ export default function DPLVehiclePanel({ vehicleId }: DPLVehiclePanelProps) {
   const getAlertColor = (severity: string) => {
     switch (severity) {
       case 'high': return 'text-red-600 bg-red-50';
-      case 'medium': return 'text-orange-600 bg-orange-50';
+      case 'medium': return 'text-blue-600 bg-blue-50';
       case 'low': return 'text-yellow-600 bg-yellow-50';
       default: return 'text-gray-600 bg-gray-50';
     }
@@ -74,9 +74,9 @@ export default function DPLVehiclePanel({ vehicleId }: DPLVehiclePanelProps) {
             <span className="font-medium text-green-600">Distance</span>
             <p className="text-lg font-bold text-green-800">{data.today.totalDistanceKm} km</p>
           </div>
-          <div className="bg-orange-50 p-3 rounded">
-            <span className="font-medium text-orange-600">Fuel Used</span>
-            <p className="text-lg font-bold text-orange-800">{data.today.fuelConsumptionL}L</p>
+          <div className="bg-blue-50 p-3 rounded">
+            <span className="font-medium text-blue-600">Fuel Used</span>
+            <p className="text-lg font-bold text-blue-800">{data.today.fuelConsumptionL}L</p>
           </div>
           <div className="bg-purple-50 p-3 rounded">
             <span className="font-medium text-purple-600">Avg Speed</span>

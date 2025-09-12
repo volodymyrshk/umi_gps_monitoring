@@ -69,7 +69,7 @@ function getPathColor(speed1: number, speed2: number): string {
   const avgSpeed = (speed1 + speed2) / 2;
   
   if (avgSpeed >= 60) return '#ef4444'; // Red for high speed
-  if (avgSpeed >= 40) return '#f59e0b'; // Orange for medium speed  
+  if (avgSpeed >= 40) return '#3b82f6'; // Blue for medium speed  
   if (avgSpeed >= 20) return '#10b981'; // Green for normal speed
   return '#6b7280'; // Gray for low speed/stopped
 }

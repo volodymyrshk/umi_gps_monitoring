@@ -132,7 +132,7 @@ export default function VehiclePopup({ vehicle, onClose, position = 'right' }: V
         {/* Technical Stats Grid - 2x2 layout */}
         <div className="grid grid-cols-2 gap-3 text-center text-xs py-2 border-b border-gray-100">
           <div className="flex items-center justify-center space-x-2">
-            <Timer className="w-3 h-3 text-orange-500" />
+            <Timer className="w-3 h-3 text-blue-500" />
             <div>
               <div className="font-bold text-gray-900">{vehicle.engineHours || 0}h</div>
               <div className="text-gray-500">Моточасы</div>
@@ -153,7 +153,7 @@ export default function VehiclePopup({ vehicle, onClose, position = 'right' }: V
             </div>
           </div>
           <div className="flex items-center justify-center space-x-2">
-            <Clock className="w-3 h-3 text-orange-500" />
+            <Clock className="w-3 h-3 text-blue-500" />
             <div>
               <div className="font-bold text-gray-900">{vehicle.roadTime || 0}ч</div>
               <div className="text-gray-500">В дороге</div>

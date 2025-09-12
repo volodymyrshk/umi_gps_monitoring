@@ -127,7 +127,7 @@ export default function VehicleCard({ vehicle, isSelected, onClick }: VehicleCar
                 </span>
               </div>
               <div className="flex items-center space-x-1">
-                <Clock className="w-3 h-3 text-orange-500" />
+                <Clock className="w-3 h-3 text-blue-500" />
                 <span className="text-xs text-gray-600">
                   {vehicle.roadTime || 0}ч в дороге
                 </span>
@@ -165,7 +165,7 @@ export default function VehicleCard({ vehicle, isSelected, onClick }: VehicleCar
                     <span className="text-xs text-gray-600">{vehicle.fuel || 0}%</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <Gauge className="w-3 h-3 text-orange-500" />
+                    <Gauge className="w-3 h-3 text-blue-500" />
                     <span className="text-xs text-gray-600">{vehicle.rpm || 0} RPM</span>
                   </div>
                 </div>

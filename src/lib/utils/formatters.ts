@@ -117,7 +117,7 @@ export class DataFormatters {
     if (score >= 90) return { text: 'Відмінно', color: 'text-green-600' };
     if (score >= 80) return { text: 'Добре', color: 'text-green-500' };
     if (score >= 70) return { text: 'Задовільно', color: 'text-yellow-600' };
-    if (score >= 60) return { text: 'Потребує покращення', color: 'text-orange-600' };
+    if (score >= 60) return { text: 'Потребує покращення', color: 'text-blue-600' };
     return { text: 'Незадовільно', color: 'text-red-600' };
   }
 

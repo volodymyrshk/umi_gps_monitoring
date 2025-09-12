@@ -77,7 +77,7 @@ export default function ModernSidebar({
                 <div className="text-gray-600">Топливо</div>
               </div>
               <div className="text-center">
-                <div className="font-bold text-orange-700">{Math.round(vehicles.reduce((acc, v) => acc + (v.battery || 0), 0) / vehicles.length)}%</div>
+                <div className="font-bold text-blue-700">{Math.round(vehicles.reduce((acc, v) => acc + (v.battery || 0), 0) / vehicles.length)}%</div>
                 <div className="text-gray-600">Заряд</div>
               </div>
             </div>

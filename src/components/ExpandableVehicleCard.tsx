@@ -183,7 +183,7 @@ export default function ExpandableVehicleCard({ vehicle, isSelected, onClick }: 
                   {/* Right Column */}
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <Clock className="w-3 h-3 text-orange-500" />
+                      <Clock className="w-3 h-3 text-blue-500" />
                       <span className="text-xs text-muted-foreground">{vehicle.roadTime || 0}ч в дороге</span>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -213,7 +213,7 @@ export default function ExpandableVehicleCard({ vehicle, isSelected, onClick }: 
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-1">
-                      <Gauge className="w-3 h-3 text-orange-500" />
+                      <Gauge className="w-3 h-3 text-blue-500" />
                     </div>
                     <div className="text-xs font-bold">{vehicle.rpm || 0}</div>
                     <div className="text-xs text-muted-foreground">RPM</div>

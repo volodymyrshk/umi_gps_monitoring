@@ -30,7 +30,7 @@ function MapUpdater({ selectedVehicle, pathSegments, showPaths }: {
       const lng = selectedVehicle.currentLocation?.longitude || selectedVehicle.location?.lng;
       
       if (lat && lng) {
-        map.flyTo([lat, lng], 15);
+        map.flyTo([lat, lng], 13);
       }
     }
   }, [selectedVehicle, map]);
@@ -165,7 +165,7 @@ export default function Map({ vehicles, selectedVehicle, onVehicleSelect, showPa
             switch (type) {
               case 'working': return '#22c55e'; // green
               case 'transport': return '#3b82f6'; // blue
-              case 'idle': return '#f59e0b'; // orange
+              case 'idle': return '#3b82f6'; // blue
               default: return '#6b7280'; // gray
             }
           };

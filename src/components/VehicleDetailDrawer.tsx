@@ -1,0 +1,290 @@
+'use client';
+
+import { useState } from 'react';
+import { Vehicle } from '@/lib/entities/vehicle';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ChevronUp, ChevronDown, X, 
+  Gauge, Fuel, Timer, Clock, 
+  MapPin, Thermometer, AlertTriangle,
+  Activity, BarChart3, History
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+interface VehicleDetailDrawerProps {
+  vehicle: Vehicle | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+type TabType = 'overview' | 'telemetry' | 'history' | 'analytics';
+
+export default function VehicleDetailDrawer({ 
+  vehicle, 
+  isOpen, 
+  onClose 
+}: VehicleDetailDrawerProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
+
+  if (!vehicle) return null;
+
+  const tabs = [
+    { id: 'overview', label: 'Обзор', icon: Activity },
+    { id: 'telemetry', label: 'Телеметрия', icon: Gauge },
+    { id: 'history', label: 'История', icon: History },
+    { id: 'analytics', label: 'Аналитика', icon: BarChart3 },
+  ] as const;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="fixed bottom-0 left-0 right-0 z-[1002] bg-white border-t border-gray-200 shadow-xl"
+        >
+          {/* Drawer Header */}
+          <div className="p-4 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <Gauge className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">{vehicle.displayName}</h3>
+                  <p className="text-xs text-gray-500">ID: {vehicle.name}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="p-1"
+                >
+                  {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClose}
+                  className="p-1"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Tab Navigation */}
+            <div className="flex space-x-1 mt-3">
+              {tabs.map(tab => {
+                const IconComponent = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      activeTab === tab.id 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    <IconComponent className="w-3 h-3" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Drawer Content */}
+          <motion.div
+            animate={{ height: isExpanded ? 'auto' : '200px' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="overflow-hidden"
+          >
+            <div className="p-4">
+              {activeTab === 'overview' && <OverviewTab vehicle={vehicle} />}
+              {activeTab === 'telemetry' && <TelemetryTab vehicle={vehicle} />}
+              {activeTab === 'history' && <HistoryTab vehicle={vehicle} />}
+              {activeTab === 'analytics' && <AnalyticsTab vehicle={vehicle} />}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function OverviewTab({ vehicle }: { vehicle: Vehicle }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="bg-gray-50 rounded-lg p-3">
+        <div className="flex items-center space-x-2 mb-2">
+          <MapPin className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium text-gray-700">Локация</span>
+        </div>
+        <p className="text-xs text-gray-600">{vehicle.currentLocation.address || 'Неизвестно'}</p>
+        <p className="text-xs text-gray-500 mt-1">
+          {vehicle.currentLocation.lat.toFixed(6)}, {vehicle.currentLocation.lng.toFixed(6)}
+        </p>
+      </div>
+
+      <div className="bg-gray-50 rounded-lg p-3">
+        <div className="flex items-center space-x-2 mb-2">
+          <Fuel className="w-4 h-4 text-blue-500" />
+          <span className="text-sm font-medium text-gray-700">Топливо</span>
+        </div>
+        <p className="text-lg font-bold text-gray-900">{vehicle.fuel || 0}%</p>
+      </div>
+
+      <div className="bg-gray-50 rounded-lg p-3">
+        <div className="flex items-center space-x-2 mb-2">
+          <Gauge className="w-4 h-4 text-green-500" />
+          <span className="text-sm font-medium text-gray-700">Скорость</span>
+        </div>
+        <p className="text-lg font-bold text-gray-900">{vehicle.speed || 0} км/ч</p>
+      </div>
+
+      <div className="bg-gray-50 rounded-lg p-3">
+        <div className="flex items-center space-x-2 mb-2">
+          <Clock className="w-4 h-4 text-orange-500" />
+          <span className="text-sm font-medium text-gray-700">В дороге</span>
+        </div>
+        <p className="text-lg font-bold text-gray-900">{vehicle.roadTime || 0}ч</p>
+      </div>
+    </div>
+  );
+}
+
+function TelemetryTab({ vehicle }: { vehicle: Vehicle }) {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div className="bg-gray-50 rounded-lg p-3 text-center">
+        <Timer className="w-6 h-6 text-primary mx-auto mb-2" />
+        <div className="text-lg font-bold text-gray-900">{vehicle.engineHours || 0}h</div>
+        <div className="text-xs text-gray-500">Моточасы</div>
+      </div>
+      
+      <div className="bg-gray-50 rounded-lg p-3 text-center">
+        <Gauge className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+        <div className="text-lg font-bold text-gray-900">{vehicle.rpm || 0}</div>
+        <div className="text-xs text-gray-500">RPM</div>
+      </div>
+      
+      <div className="bg-gray-50 rounded-lg p-3 text-center">
+        <Thermometer className="w-6 h-6 text-red-500 mx-auto mb-2" />
+        <div className="text-lg font-bold text-gray-900">{vehicle.engineTemp || 85}°C</div>
+        <div className="text-xs text-gray-500">Температура</div>
+      </div>
+      
+      <div className="bg-gray-50 rounded-lg p-3 text-center">
+        <Fuel className="w-6 h-6 text-green-500 mx-auto mb-2" />
+        <div className="text-lg font-bold text-gray-900">{vehicle.fuel || 0}%</div>
+        <div className="text-xs text-gray-500">Топливо</div>
+      </div>
+
+      <div className="bg-gray-50 rounded-lg p-3 text-center">
+        <Activity className="w-6 h-6 text-purple-500 mx-auto mb-2" />
+        <div className="text-lg font-bold text-gray-900">{vehicle.battery || 0}%</div>
+        <div className="text-xs text-gray-500">Заряд</div>
+      </div>
+
+      <div className="bg-gray-50 rounded-lg p-3 text-center">
+        <MapPin className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
+        <div className="text-lg font-bold text-gray-900">{vehicle.speed || 0}</div>
+        <div className="text-xs text-gray-500">км/ч</div>
+      </div>
+    </div>
+  );
+}
+
+function HistoryTab({ vehicle }: { vehicle: Vehicle }) {
+  return (
+    <div className="space-y-3">
+      <div className="text-sm text-gray-600">Последние события:</div>
+      <div className="space-y-2 max-h-32 overflow-y-auto">
+        {Array.from({ length: 5 }, (_, i) => (
+          <div key={i} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
+            <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium text-gray-900">
+                {i === 0 && 'Двигатель запущен'}
+                {i === 1 && 'Изменение скорости'}
+                {i === 2 && 'Геозона: въезд'}
+                {i === 3 && 'Остановка двигателя'}
+                {i === 4 && 'Низкий уровень топлива'}
+              </div>
+              <div className="text-xs text-gray-500">
+                {new Date(Date.now() - i * 3600000).toLocaleTimeString('ru-RU')}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AnalyticsTab({ vehicle }: { vehicle: Vehicle }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-gray-50 rounded-lg p-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Сегодня</h4>
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-600">Пробег:</span>
+            <span className="font-medium">42 км</span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-600">Топливо:</span>
+            <span className="font-medium">12.5 л</span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-600">Моточасы:</span>
+            <span className="font-medium">3.2 ч</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-gray-50 rounded-lg p-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">На этой неделе</h4>
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-600">Пробег:</span>
+            <span className="font-medium">287 км</span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-600">Топливо:</span>
+            <span className="font-medium">89.2 л</span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-600">Моточасы:</span>
+            <span className="font-medium">22.1 ч</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-gray-50 rounded-lg p-4">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">За месяц</h4>
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-600">Пробег:</span>
+            <span className="font-medium">1,243 км</span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-600">Топливо:</span>
+            <span className="font-medium">378.5 л</span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-600">Моточасы:</span>
+            <span className="font-medium">95.7 ч</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

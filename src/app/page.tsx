@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import DockHeader from '@/components/DockHeader';
 import ComprehensiveSidebar from '@/components/ComprehensiveSidebar';
+import VehicleDetailDrawer from '@/components/VehicleDetailDrawer';
 import { useState, useEffect } from 'react';
 import { vehicleService } from '@/lib/services';
 import { Vehicle, VehicleFilter } from '@/lib/entities/vehicle';
@@ -20,6 +21,7 @@ export default function Home() {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mapInstance, setMapInstance] = useState<any>(null);
+  const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
   
   // Path tracking state
   const [showPaths, setShowPaths] = useState(false);
@@ -108,10 +110,12 @@ export default function Home() {
       const vehicleDplPaths = getSelectedVehicleDPLPath(vehicle.id);
       setDplPaths(vehicleDplPaths);
       setShowPaths(true); // Automatically show paths when vehicle is selected
+      setDetailDrawerOpen(true); // Open detail drawer
     } else {
       // Clear DPL paths when no vehicle selected
       setDplPaths([]);
       setShowPaths(false); // Also hide paths when no vehicle selected
+      setDetailDrawerOpen(false); // Close detail drawer
     }
   };
 
@@ -181,6 +185,16 @@ export default function Home() {
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
+      {/* Vehicle Detail Drawer */}
+      <VehicleDetailDrawer
+        vehicle={selectedVehicle}
+        isOpen={detailDrawerOpen}
+        onClose={() => {
+          setDetailDrawerOpen(false);
+          setSelectedVehicle(null);
+        }}
+      />
     </div>
   );
 }
